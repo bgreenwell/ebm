@@ -1,0 +1,57 @@
+---
+title: "intro"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{intro}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+self_contained: false
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo = TRUE,
+  cache = TRUE
+)
+```
+
+```{r setup}
+library(ebm)
+
+
+data("Hitters", package = "ISLR2")
+
+# Remove rows with missing response values
+head(hitters <- Hitters[!is.na(Hitters$Salary), ])
+```
+
+```{r ebm-regressor}
+# Fit a default EBM regressor
+fit <- ebm(Salary ~ ., data = hitters, objective = "rmse")
+fit  # still need to implement print() and summary() methods
+```
+
+```{r ebm-regressor-predict}
+head(predict(fit, newdata = hitters))
+head(predict(fit, newdata = hitters, se.fit = TRUE))
+```
+```{r ebm-regressor-show-global-importance}
+plot(fit, display = "markdown")
+```
+
+```{r ebm-regressor-show-global-term}
+plot(fit, term = "Years", display = "markdown")
+```
+
+```{r ebm-regressor-show-global-term-mono}
+fit$monotonize("Years", increasing = FALSE)
+plot(fit, term = "Years", display = "markdown")
+```
+
+```{r ebm-regressor-show-local}
+# Understand an individual prediction
+x <- subset(hitters, select = -Salary)[1L, ]  # use first observation
+plot(fit, local = TRUE, X = x, y = hitters$Salary[1L], display = "markdown")
+```

@@ -1,0 +1,26 @@
+Version: 1.0
+ProjectId: 242dde14-46d5-48c2-b764-e1c86c8057aa
+
+RestoreWorkspace: No
+SaveWorkspace: No
+AlwaysSaveHistory: No
+
+EnableCodeIndexing: Yes
+UseSpacesForTab: Yes
+NumSpacesForTab: 2
+Encoding: UTF-8
+
+RnwWeave: knitr
+LaTeX: pdfLaTeX
+
+AutoAppendNewline: Yes
+StripTrailingWhitespace: Yes
+
+BuildType: Package
+PackageUseDevtools: Yes
+PackageInstallArgs: --no-multiarch --with-keep.source
+PackageRoxygenize: rd,collate,namespace
+
+PythonType: system
+PythonVersion: 3.10.4
+PythonPath: ~/.pyenv/versions/3.10.4/bin/python
