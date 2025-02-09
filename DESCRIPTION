@@ -2,13 +2,8 @@ Package: ebm
 Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1.0
-Authors@R: c(
-    person(
-      "Jane", "Doe",
-      email = "jane@example.com",
-      role = c("aut", "cre")
-    )
-  )
+Authors@R: person("Brandon", "Greenwell", email = "greenwell.brandon@gmail.com", role =
+         c("aut", "cre"), comment = c(ORCID = "0000-0002-8120-0084"))
 Description: More about what it does (maybe more than one line).
     Continuation lines should be indented.
 Imports: reticulate
