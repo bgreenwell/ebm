@@ -6,7 +6,9 @@ Authors@R: person("Brandon", "Greenwell", email = "greenwell.brandon@gmail.com",
          c("aut", "cre"), comment = c(ORCID = "0000-0002-8120-0084"))
 Description: More about what it does (maybe more than one line).
     Continuation lines should be indented.
-Imports: reticulate
+Imports: 
+    reticulate,
+    ggplot2
 Suggests:
     htmltools,
     ISLR2,

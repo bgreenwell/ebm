@@ -53,7 +53,7 @@ Default is \code{"browser"}.}
 interpret dashboard. Default is \code{FALSE}. Only works when \code{display = "viewer"}
 or \code{display = "url"} (e.g., paste the resulting URL in your browser).}
 
-\item{...}{Additional optional arguments. (Currently ignored.)}
+\item{...}{Additional optional arguments.}
 }
 \description{
 Provides an interactive visualization for a given explanation(s).

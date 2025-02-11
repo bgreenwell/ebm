@@ -56,7 +56,7 @@ You can also plot the individual shape functions (or term contributions), as sho
 plot(fit, term = "Years", display = "markdown")
 ```
 
-While the **ebm** package does not expose 100% of the functionality available in Python, you can pretty much do anything you need by interacting directly with the underlying Python objects (the magic happens through [reticulate](https://rstudio.github.io/reticulate/)). For instance, we invoke the `monotonize()` method to post process the term for `"Years"` by enforcing increasing monotonicity:
+While the **ebm** package does not expose 100% of the functionality available in Python, you can pretty much do anything you need by interacting directly with the underlying Python objects (the magic happens through [reticulate](https://rstudio.github.io/reticulate/)). For instance, below we invoke the `monotonize()` method of `fit` to post process the term for `"Years"` by enforcing increasing monotonicity:
 
 ```{r ebm-regressor-show-global-term-mono}
 fit$monotonize("Years", increasing = FALSE)

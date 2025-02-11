@@ -2,7 +2,12 @@
 
 S3method(plot,EBM)
 S3method(predict,EBM)
+export(GeomStepribbon)
 export(ebm)
+export(geom_stepribbon)
+importFrom(ggalt,stat_stepribbon)
+importFrom(ggplot2,GeomRibbon)
+importFrom(ggplot2,layer)
 importFrom(stats,model.frame)
 importFrom(stats,model.response)
 importFrom(stats,na.pass)

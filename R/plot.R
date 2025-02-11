@@ -28,7 +28,9 @@
 #' @param full_dashboard Logical indicating whether or not to display the full
 #' interpret dashboard. Default is `FALSE`. Only works when `display = "viewer"`
 #' or `display = "url"` (e.g., paste the resulting URL in your browser).
-#' @param ... Additional optional arguments. (Currently ignored.)
+#' @param ... Additional optional arguments.
+#'
+#' @importFrom ggalt stat_stepribbon
 #' @export
 plot.EBM <- function(x, term = NULL, local = FALSE, X = NULL, y = NULL,
                      init_score = NULL, display = c("viewer", "markdown", "url"),
@@ -42,7 +44,8 @@ plot.EBM <- function(x, term = NULL, local = FALSE, X = NULL, y = NULL,
       init_score = init_score,
       display = display,
       viewer = viewer,
-      full_dashboard = full_dashboard
+      full_dashboard = full_dashboard,
+      ...
     )
   } else {
     plot_global(
@@ -50,9 +53,18 @@ plot.EBM <- function(x, term = NULL, local = FALSE, X = NULL, y = NULL,
       term = term,
       display = display,
       viewer = viewer,
-      full_dashboard = full_dashboard
+      full_dashboard = full_dashboard,
+      ...
     )
   }
+}
+
+
+#' @keywords internal
+#' @noRd
+get_plot_type <- function(ordered_dict) {
+  # Should be one of "scatter", "bar", or "heatmap"
+  ordered_dict$data[[1L]]$type
 }
 
 
@@ -80,60 +92,95 @@ get_term_idx <- function(term_names, x = NULL) {
 plot_global <- function(
     object,
     term = NULL,
+    type = c("static", "plotly"),
     display = c("viewer", "markdown", "url"),
     viewer = c("browser", "rstudio"),
-    full_dashboard = FALSE
+    full_dashboard = FALSE,
+    ...
 ) {
 
-  display <- match.arg(display)
-
-  # Return URL of full dashboard
-  if (display == "url" || isTRUE(full_dashboard)) {
-    return(interpret$show_link(object$explain_global()))
-  }
-
-  # Generate plotly object for specified term
-  term_names <- strsplit(object$term_names_, split = " & ")
-  idx <- get_term_idx(term_names, x = term)  # idx of associated term in model
-  plt <- object$explain_global()$visualize(idx)  # Python plotly object
-
-  # Temporary HTML file hold plotly object
-  tmpfile <- tempfile(fileext = ".html")
+  type <- match.arg(type)
 
   ##############################################################################
-  # Display plot in specified viewer
+  # Static graphic
   ##############################################################################
-  if (display == "viewer") {
-    plt$write_html(tmpfile, full_html = TRUE)  # generate full HTML
-    viewer <- match.arg(viewer)
-    if (viewer == "browser") {
-      if (requireNamespace("utils", quietly = TRUE)) {
-        utils::browseURL(tmpfile)
-      } else {
-        stop("Package \"utils\" is required for whenever ",
-             "`viewer = \"browser\"`. Please install it.", call. = FALSE)
-      }
+  if (type == "static") {
+
+    if (is.null(term)) {
+      plot(1:3)
     } else {
-      if (requireNamespace("rstudioapi", quietly = TRUE)) {
-        if (rstudioapi::isAvailable()) {  # make sure RStudio is running
-          rstudioapi::viewer(tmpfile)
-        }
+
+      # Generate plotly object for specified term
+      term_names <- strsplit(object$term_names_, split = " & ")
+      idx <- get_term_idx(term_names, x = term)  # idx of associated term in model
+      plt <- object$explain_global()$visualize(idx)  # Python plotly object
+      ordered_dict <- plt$to_ordered_dict()
+      plot_type <- get_plot_type(ordered_dict)
+      if (plot_type == "scatter") {
+        ggplot_scatter(ordered_dict)
+      } else if (plot_type == "bar") {
+        ggplot_bar(ordered_dict)
       } else {
-        stop("Package \"rstudioapi\" is required for whenever ",
-             "`viewer = \"rstudio\"`. Please install it.", call. = FALSE)
+        ggplot_heatmap(ordered_dict, ...)
       }
+
     }
+
+
   ##############################################################################
-  # Display in markdown-type document
+  # Plotly graphic
   ##############################################################################
   } else {
-    plt$write_html(tmpfile, full_html = FALSE)  # generate partial HTML
-    if (requireNamespace("htmltools", quietly = TRUE)) {
-      htmltools::includeHTML(tmpfile)
-      # htmltools::tags$iframe(tmpfile)
+    display <- match.arg(display)
+
+    # Return URL of full dashboard
+    if (display == "url" || isTRUE(full_dashboard)) {
+      return(interpret$show_link(object$explain_global()))
+    }
+
+    # Generate plotly object for specified term
+    term_names <- strsplit(object$term_names_, split = " & ")
+    idx <- get_term_idx(term_names, x = term)  # idx of associated term in model
+    plt <- object$explain_global()$visualize(idx)  # Python plotly object
+
+    # Temporary HTML file hold plotly object
+    tmpfile <- tempfile(fileext = ".html")
+
+    ############################################################################
+    # Display plot in specified viewer
+    ############################################################################
+    if (display == "viewer") {
+      plt$write_html(tmpfile, full_html = TRUE)  # generate full HTML
+      viewer <- match.arg(viewer)
+      if (viewer == "browser") {
+        if (requireNamespace("utils", quietly = TRUE)) {
+          utils::browseURL(tmpfile)
+        } else {
+          stop("Package \"utils\" is required for whenever ",
+               "`viewer = \"browser\"`. Please install it.", call. = FALSE)
+        }
+      } else {
+        if (requireNamespace("rstudioapi", quietly = TRUE)) {
+          if (rstudioapi::isAvailable()) {  # make sure RStudio is running
+            rstudioapi::viewer(tmpfile)
+          }
+        } else {
+          stop("Package \"rstudioapi\" is required for whenever ",
+               "`viewer = \"rstudio\"`. Please install it.", call. = FALSE)
+        }
+      }
+    ############################################################################
+    # Display in markdown-type document
+    ############################################################################
     } else {
-      stop("Package \"htmltools\" is required whenever ",
-           "`display = \"markdown\"`. Please install it.", call. = FALSE)
+      plt$write_html(tmpfile, full_html = FALSE)  # generate partial HTML
+      if (requireNamespace("htmltools", quietly = TRUE)) {
+        htmltools::includeHTML(tmpfile)
+        # htmltools::tags$iframe(tmpfile)
+      } else {
+        stop("Package \"htmltools\" is required whenever ",
+             "`display = \"markdown\"`. Please install it.", call. = FALSE)
+      }
     }
   }
 }
@@ -148,7 +195,8 @@ plot_local <- function(
     init_score = NULL,
     display = c("viewer", "markdown", "url"),
     viewer = c("browser", "rstudio"),
-    full_dashboard = FALSE
+    full_dashboard = FALSE,
+    ...
 ) {
 
   display <- match.arg(display)
@@ -205,4 +253,130 @@ plot_local <- function(
     }
   }
 
+}
+
+
+################################################################################
+# Static plotters
+################################################################################
+
+#' @keywords internal
+ggplot_bar <- function(
+    ordered_dict,
+    geom = c("point", "col"),
+    mapping = NULL,
+    aesthetics = list(),
+    horizontal = FALSE,
+    uncertainty = TRUE,
+    width = 0.5
+) {
+  geom <- match.arg(geom, several.ok = FALSE)
+  plotly_data <- ordered_dict$data[[1L]]  # second component is distribution
+  df <- data.frame(
+    "x" = plotly_data$x,
+    "y" = plotly_data$y,
+    "y_error" = plotly_data$error_y$array
+  )
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = x, y = y))
+  if (geom == "col") {
+    p <- p + do.call(
+      what = ggplot2::geom_col,
+      args = c(list(mapping = mapping), aesthetics)
+    )
+  }
+  if (geom == "point") {
+    p <- p + do.call(
+      what = ggplot2::geom_point,
+      args = c(list(mapping = mapping), aesthetics)
+    )
+  }
+
+  # Add error bars
+  if (isTRUE(uncertainty)) {
+    p <- p + ggplot2::geom_errorbar(aes(x = x, ymin = y - y_error, ymax = y + y_error), width = width)
+  }
+
+  # Add labels, titles, etc.
+  p <- p + ggplot2::theme(legend.position = "none")
+  p <- p + ggplot2::xlab(ordered_dict$layout$title)
+  p <- p + ggplot2::ylab("Score")
+  if (horizontal) {
+    p <- p + ggplot2::coord_flip()
+  }
+  p
+}
+
+
+#' @keywords internal
+ggplot_scatter <- function(
+    ordered_dict,
+    mapping = NULL,
+    aesthetics = list(),
+    horizontal = FALSE,
+    uncertainty = TRUE,
+    alpha = 0.5,
+    fill = "grey"
+) {
+  # geom <- match.arg(geom, several.ok = FALSE)
+  # components <- sapply(ordered_dict$data, FUN = function(x) x$name)
+  # main <- which(components == "Main")
+  plotly_data_main <- ordered_dict$data[[2L]]
+  plotly_data_lwr <- ordered_dict$data[[1L]]
+  plotly_data_upr <- ordered_dict$data[[3L]]
+  df <- data.frame(
+    "x" = plotly_data_main$x,
+    "y" = plotly_data_main$y,
+    "y_lwr" = plotly_data_lwr$y,
+    "y_upr" = plotly_data_upr$y
+  )
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = x, y = y))
+  if (isTRUE(uncertainty)) {
+    p <- p + geom_stepribbon(aes(ymin = y_lwr, ymax = y_upr), alpha = alpha, fill = fill)
+  }
+  p <- p + do.call(
+    what = ggplot2::geom_step,
+    args = c(list(mapping = mapping), aesthetics)
+  )
+  #p <- p + ggplot2::geom_step(aes(x = x, y = y_lwr))
+  #p <- p + ggplot2::geom_step(aes(x = x, y = y_upr))
+
+  # Add labels, titles, etc.
+  p <- p + ggplot2::theme(legend.position = "none")
+  p <- p + ggplot2::xlab(ordered_dict$layout$title)
+  p <- p + ggplot2::ylab("Score")
+  p
+}
+
+
+#' @keywords internal
+ggplot_heatmap <- function(ordered_dict, ...) {
+  midpoints <- function(x) {
+    x[-length(x)] + diff(x) / 2
+  }
+  plotly_data <- ordered_dict$data[[1L]]  # second component is distribution
+  df <- expand.grid(
+    "x" = midpoints(plotly_data$x),
+    "y" = midpoints(plotly_data$y)
+  )
+  df$z <- as.numeric(plotly_data$z)
+  # p <- ggplot2::ggplot(df, ggplot2::aes(x = x, y = y, fill = z))
+  # p <- p + do.call(
+  #   # what = ggplot2::geom_contour_filled,
+  #   what = ggplot2::geom_tile,
+  #   # what = ggplot2::geom_raster,
+  #   args = c(list(mapping = mapping), aesthetics)
+  # )
+  #
+  # # Add labels, titles, etc.
+  # # p <- p + ggplot2::theme(legend.position = "none")
+  # p <- p + ggplot2::xlab(ordered_dict$layout$xaxis$title$text)
+  # p <- p + ggplot2::ylab(ordered_dict$layout$yaxis$title$text)
+  # p
+  lattice::levelplot(
+    x = z ~ x*y,
+    data = df,
+    xlab = ordered_dict$layout$xaxis$title$text,
+    ylab = ordered_dict$layout$yaxis$title$text,
+    ...
+  )
 }

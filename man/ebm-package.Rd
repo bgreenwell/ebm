@@ -8,7 +8,7 @@
 More about what it does (maybe more than one line). Continuation lines should be indented.
 }
 \author{
-\strong{Maintainer}: Jane Doe \email{jane@example.com}
+\strong{Maintainer}: Brandon Greenwell \email{greenwell.brandon@gmail.com} (\href{https://orcid.org/0000-0002-8120-0084}{ORCID})
 
 }
 \keyword{internal}
