@@ -1,28 +1,14 @@
-# Stolen from the \code{RmcdrPlugin.KMggplot2} (slightly modified)
-
-#' Step ribbon plots.
+#' Step ribbons and area plots
 #'
-#' \code{geom_stepribbon} is an extension of the \code{geom_ribbon}, and
-#' is optimized for Kaplan-Meier plots with pointwise confidence intervals
-#' or a confidence band.
+#' A combination of [geom_ribbon()][ggplot2::geom_ribbon] and
+#' [geom_step()][ggplot2::geom_step].
 #'
-#' @section Aesthetics:
-#' \Sexpr[results=rd,stage=build]{ggplot2:::rd_aesthetics("geom", "ribbon")}
+#' @inheritParams ggplot2::geom_ribbon
 #'
-#' @seealso
-#'   \code{\link[ggplot2]{geom_ribbon}} \code{geom_stepribbon}
-#'   inherits from \code{geom_ribbon}.
-#' @inheritParams ggplot2:::geom_ribbon
-#' @examples
-#' library(ggplot2)
-#' huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
-#' h <- ggplot(huron, aes(year))
-#' h + geom_stepribbon(aes(ymin = level - 1, ymax = level + 1), fill = "grey70") +
-#'     geom_step(aes(y = level))
-#' h + geom_ribbon(aes(ymin = level - 1, ymax = level + 1), fill = "grey70") +
-#'     geom_line(aes(y = level))
-#' @rdname geom_stepribbon
+#' @source Taken from [ldatools](https://github.com/adibender/ldatools/tree/master).
+#'
 #' @importFrom ggplot2 layer GeomRibbon
+#'
 #' @export
 geom_stepribbon <- function(
     mapping     = NULL,

@@ -56,6 +56,15 @@
 <span>  X <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  init_score <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  interactive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  geom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"point"</span>, <span class="st">"col"</span><span class="op">)</span>,</span>
+<span>  mapping <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  aesthetics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  horizontal <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  uncertainty <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  width <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  fill <span class="op">=</span> <span class="st">"grey"</span>,</span>
 <span>  display <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"viewer"</span>, <span class="st">"markdown"</span>, <span class="st">"url"</span><span class="op">)</span>,</span>
 <span>  viewer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"browser"</span>, <span class="st">"rstudio"</span><span class="op">)</span>,</span>
 <span>  full_dashboard <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -95,9 +104,65 @@ per-sample initialization score. If samples scores it should be the same
 length as <code>X</code>.</p></dd>
 
 
+<dt>interactive</dt>
+<dd><p>Logical indicating whether to produce an interactive plot
+based on HTML. Default is <code>FALSE</code>.
+(<code>type = "static"</code>) or interactive plot (<code>type = "plotly"</code>)</p></dd>
+
+
+<dt>geom</dt>
+<dd><p>Character string specifying which type of plot to construct for
+terms associated with categorical features. Current options are:</p><ul><li><p><code>geom = "col"</code> uses <a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a> to construct a bar chart
+of the scores.</p></li>
+<li><p><code>geom = "point"</code> uses <a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a> to construct a
+Cleveland dot plot of the term scores.</p></li>
+</ul><p>Default is <code>"point"</code>.</p></dd>
+
+
+<dt>mapping</dt>
+<dd><p>Set of aesthetic mappings created by
+<a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a>-related functions and/or tidy eval helpers. See example
+usage below.</p></dd>
+
+
+<dt>aesthetics</dt>
+<dd><p>List specifying additional arguments passed on to
+<a href="https://ggplot2.tidyverse.org/reference/layer.html" class="external-link">layer</a>. These are often aesthetics, used to set an aesthetic
+to a fixed value, like<code>colour = "red"</code> or <code>size = 3</code>. See example usage
+below.</p></dd>
+
+
+<dt>horizontal</dt>
+<dd><p>Logical indicating whether or not term plots for
+categorical features should be flipped horzintally. Default is <code>FALSE</code>.</p></dd>
+
+
+<dt>uncertainty</dt>
+<dd><p>Logical indicating whether or not to also display
+uncertainty via error bars on the main effect plots. Default is <code>TRUE</code>.
+Not very useful unless <code>outer_bags &gt; 1</code> when calling <code><a href="ebm.html">ebm()</a></code>.</p></dd>
+
+
+<dt>width</dt>
+<dd><p>Numeric specifying the width of the error bars displayed in bar/
+dot plots for categorical features. Default is 0.5.</p></dd>
+
+
+<dt>alpha</dt>
+<dd><p>Numeric between 0 and 1 specifying the level of transparency to
+use when displaying uncertainty in plots for continuous features. Default is
+0.5.</p></dd>
+
+
+<dt>fill</dt>
+<dd><p>Character string specifying the fill color to use when displaying
+uncertainty in plots for continuous features. Default is <code>"grey"</code>.</p></dd>
+
+
 <dt>display</dt>
 <dd><p>Character string specifying how the results should be
-displayed. Available options are <code>"viewer"</code> (e.g., RStudio viewer browser),
+displayed whenever <code>interactive = TRUE</code>. Available options are <code>"viewer"</code>
+(e.g., RStudio viewer browser),
 <code>"markdown"</code> (e.g., for vingettes, Quarto, or Rmarkdown documents), or
 <code>"url"</code> (e.g., to print a URL which can be pasted into a browser). When
 <code>display = "url"</code>, a URL for viewing the entire interpret dashboard is
@@ -119,7 +184,8 @@ or <code>display = "url"</code> (e.g., paste the resulting URL in your browser).
 
 
 <dt>...</dt>
-<dd><p>Additional optional arguments. (Currently ignored.)</p></dd>
+<dd><p>Additional optional arguments. Currently only passed onto
+<a href="https://rdrr.io/pkg/lattice/man/levelplot.html" class="external-link">levelplot()</a> for heatmaps of interaction effects.</p></dd>
 
 </dl></div>
 
