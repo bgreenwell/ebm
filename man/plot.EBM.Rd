@@ -12,6 +12,7 @@
   y = NULL,
   init_score = NULL,
   interactive = FALSE,
+  n_features = NULL,
   geom = c("point", "col"),
   mapping = NULL,
   aesthetics = list(),
@@ -48,6 +49,10 @@ length as \code{X}.}
 \item{interactive}{Logical indicating whether to produce an interactive plot
 based on HTML. Default is \code{FALSE}.
 (\code{type = "static"}) or interactive plot (\code{type = "plotly"})}
+
+\item{n_features}{Integer specifying the maximum number of variable
+importance scores to plot. Default is \code{NULL} which corresponds to all
+features.}
 
 \item{geom}{Character string specifying which type of plot to construct for
 terms associated with categorical features. Current options are:

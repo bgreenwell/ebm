@@ -57,6 +57,7 @@
 <span>  y <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  init_score <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  interactive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n_features <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  geom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"point"</span>, <span class="st">"col"</span><span class="op">)</span>,</span>
 <span>  mapping <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  aesthetics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -108,6 +109,12 @@ length as <code>X</code>.</p></dd>
 <dd><p>Logical indicating whether to produce an interactive plot
 based on HTML. Default is <code>FALSE</code>.
 (<code>type = "static"</code>) or interactive plot (<code>type = "plotly"</code>)</p></dd>
+
+
+<dt>n_features</dt>
+<dd><p>Integer specifying the maximum number of variable
+importance scores to plot. Default is <code>NULL</code> which corresponds to all
+features.</p></dd>
 
 
 <dt>geom</dt>

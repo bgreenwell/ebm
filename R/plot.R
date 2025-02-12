@@ -30,6 +30,10 @@ y_upr <- NULL
 #' based on HTML. Default is `FALSE`.
 #' (`type = "static"`) or interactive plot (`type = "plotly"`)
 #'
+#' @param n_features Integer specifying the maximum number of variable
+#' importance scores to plot. Default is `NULL` which corresponds to all
+#' features.
+#'
 #' @param geom Character string specifying which type of plot to construct for
 #' terms associated with categorical features. Current options are:
 #'
@@ -100,6 +104,7 @@ plot.EBM <- function(
     y = NULL,
     init_score = NULL,
     interactive = FALSE,
+    n_features = NULL,
     geom = c("point", "col"),
     mapping = NULL,
     aesthetics = list(),
@@ -119,6 +124,11 @@ plot.EBM <- function(
       X = X,
       y = y,
       init_score = init_score,
+      interactive = interactive,
+      geom = geom,
+      mapping = mapping,
+      aesthetics = aesthetics,
+      horizontal = horizontal,
       display = display,
       viewer = viewer,
       full_dashboard = full_dashboard,
@@ -129,6 +139,7 @@ plot.EBM <- function(
       object = x,
       term = term,
       interactive = interactive,
+      n_features = n_features,
       geom = geom,
       mapping = mapping,
       aesthetics = aesthetics,
@@ -179,6 +190,7 @@ plot_global <- function(
     object,
     term = NULL,
     interactive = FALSE,
+    n_features = NULL,
     geom = c("point", "col"),
     mapping = NULL,
     aesthetics = list(),
@@ -200,11 +212,14 @@ plot_global <- function(
   if (isFALSE(interactive)) {
 
     if (is.null(term)) {
-      imp <- as.numeric(object$term_importances())
-      tna <- object$term_names_
-      ord <- order(imp, decreasing = FALSE)
-      dotchart(imp[ord], labels = tna[ord],
-               xlab = "Mean absolute score (weighted)", ...)
+      # imp <- as.numeric(object$term_importances())
+      # tna <- object$term_names_
+      # ord <- order(imp, decreasing = FALSE)
+      # dotchart(imp[ord], labels = tna[ord],
+      #          xlab = "Mean absolute score (weighted)", ...)
+      gg_plot_importance(object, n_features = n_features, geom = geom,
+                         mapping = mapping, aesthetics = aesthetics,
+                         horizontal = horizontal, ...)
     } else {
 
       # Generate plotly object for specified term
@@ -215,11 +230,11 @@ plot_global <- function(
       plot_type <- get_plot_type(ordered_dict)
       if (plot_type == "scatter") {
         ggplot_scatter(ordered_dict, mapping = mapping, aesthetics = aesthetics,
-                       uncertainty = uncertainty, alpha = alpha, fill = fill)
+                       uncertainty = uncertainty, alpha = alpha, fill = fill, ...)
       } else if (plot_type == "bar") {
         ggplot_bar(ordered_dict, geom = geom, mapping = mapping,
                    aesthetics = aesthetics, horizontal = horizontal,
-                   uncertainty = uncertainty, width = width)
+                   uncertainty = uncertainty, width = width, ...)
       } else {
         ggplot_heatmap(ordered_dict, ...)
       }
@@ -292,65 +307,81 @@ plot_local <- function(
     X,
     y = NULL,
     init_score = NULL,
+    interactive = FALSE,
+    geom = c("point", "col"),
+    mapping = NULL,
+    aesthetics = list(),
+    horizontal = FALSE,
     display = c("viewer", "markdown", "url"),
     viewer = c("browser", "rstudio"),
     full_dashboard = FALSE,
     ...
 ) {
 
-  display <- match.arg(display)
-
-  # Return URL of full dashboard
-  if (display == "url" || isTRUE(full_dashboard)) {
-    return(interpret$show_link(object$explain_local(X, y = y, init_score = init_score)))
-  }
-
   if (nrow(X) != 1 || length(y) != 1L) {
     warning("Plotting local explanations currently only works for a single ",
             "observation. Plotting explanations only for the first row of `X`.",
             call. = FALSE)
   }
-  plt <- object$explain_local(X, y = y, init_score = init_score)$visualize(0L)  # Python plotly object
 
-  # Temporary HTML file hold plotly object
-  tmpfile <- tempfile(fileext = ".html")
+  #######
+  #
+  #######
+  if (isFALSE(interactive)) {
+    plt <- object$explain_local(X, y = y, init_score = init_score)$visualize(0L)  # Python plotly object
+    ordered_dict <- plt$to_ordered_dict()
+    gg_plot_explanation(ordered_dict, geom = geom, mapping = mapping,
+                        aesthetics = aesthetics, horizontal = horizontal, ...)
+  } else {
+    display <- match.arg(display)
 
-  ##############################################################################
-  # Display plot in specified viewer
-  ##############################################################################
-  if (display == "viewer") {
-    plt$write_html(tmpfile, full_html = TRUE)  # generate full HTML
-    viewer <- match.arg(viewer)
-    if (viewer == "browser") {
-      if (requireNamespace("utils", quietly = TRUE)) {
-        utils::browseURL(tmpfile)
-      } else {
-        stop("Package \"utils\" is required for whenever ",
-             "`viewer = \"browser\"`. Please install it.", call. = FALSE)
-      }
-    } else {
-      if (requireNamespace("rstudioapi", quietly = TRUE)) {
-        if (rstudioapi::isAvailable()) {  # make sure RStudio is running
-          rstudioapi::viewer(tmpfile)
+    # Return URL of full dashboard
+    if (display == "url" || isTRUE(full_dashboard)) {
+      return(interpret$show_link(object$explain_local(X, y = y, init_score = init_score)))
+    }
+    plt <- object$explain_local(X, y = y, init_score = init_score)$visualize(0L)  # Python plotly object
+
+    # Temporary HTML file hold plotly object
+    tmpfile <- tempfile(fileext = ".html")
+
+    ############################################################################
+    # Display plot in specified viewer
+    ############################################################################
+    if (display == "viewer") {
+      plt$write_html(tmpfile, full_html = TRUE)  # generate full HTML
+      viewer <- match.arg(viewer)
+      if (viewer == "browser") {
+        if (requireNamespace("utils", quietly = TRUE)) {
+          utils::browseURL(tmpfile)
+        } else {
+          stop("Package \"utils\" is required for whenever ",
+               "`viewer = \"browser\"`. Please install it.", call. = FALSE)
         }
       } else {
-        stop("Package \"rstudioapi\" is required for whenever ",
-             "`viewer = \"rstudio\"`. Please install it.", call. = FALSE)
+        if (requireNamespace("rstudioapi", quietly = TRUE)) {
+          if (rstudioapi::isAvailable()) {  # make sure RStudio is running
+            rstudioapi::viewer(tmpfile)
+          }
+        } else {
+          stop("Package \"rstudioapi\" is required for whenever ",
+               "`viewer = \"rstudio\"`. Please install it.", call. = FALSE)
+        }
+      }
+    ############################################################################
+    # Display in markdown-type document
+    ############################################################################
+    } else {
+      plt$write_html(tmpfile, full_html = FALSE)  # generate partial HTML
+      if (requireNamespace("htmltools", quietly = TRUE)) {
+        htmltools::includeHTML(tmpfile)
+        # htmltools::tags$iframe(tmpfile)
+      } else {
+        stop("Package \"htmltools\" is required whenever ",
+             "`display = \"markdown\"`. Please install it.", call. = FALSE)
       }
     }
-    ##############################################################################
-    # Display in markdown-type document
-    ##############################################################################
-  } else {
-    plt$write_html(tmpfile, full_html = FALSE)  # generate partial HTML
-    if (requireNamespace("htmltools", quietly = TRUE)) {
-      htmltools::includeHTML(tmpfile)
-      # htmltools::tags$iframe(tmpfile)
-    } else {
-      stop("Package \"htmltools\" is required whenever ",
-           "`display = \"markdown\"`. Please install it.", call. = FALSE)
-    }
   }
+
 
 }
 
@@ -360,6 +391,59 @@ plot_local <- function(
 ################################################################################
 
 #' @keywords internal
+#' @noRd
+gg_plot_importance <- function(
+    object,
+    n_features = NULL,
+    geom = c("point", "col"),
+    mapping = NULL,
+    aesthetics = list(),
+    horizontal = FALSE,
+    ...
+) {
+  geom <- match.arg(geom, several.ok = FALSE)
+  df <- data.frame(
+    "x" = object$term_names_,
+    "y" = as.numeric(object$term_importances())  # mean absolute score
+  )
+
+  # Determine how many features to include in the plot
+  if (!is.null(n_features)) {
+    n_features <- as.integer(n_features)[1L]  # make sure n_features is a single integer
+    if (n_features > nrow(df) || n_features < 1L) {
+      n_features <- nrow(df)
+    }
+    df <- df[order(df$y, decreasing = TRUE), ]
+    df <- df[seq_len(n_features), ]  # only retain num_features variable importance scores
+  }
+
+  # Generate plot
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = reorder(x, y), y = y))
+  if (geom == "col") {
+    p <- p + do.call(
+      what = ggplot2::geom_col,
+      args = c(list(mapping = mapping), aesthetics)
+    )
+  }
+  if (geom == "point") {
+    p <- p + do.call(
+      what = ggplot2::geom_point,
+      args = c(list(mapping = mapping), aesthetics)
+    )
+  }
+
+  # Add labels, titles, etc.
+  p <- p + ggplot2::xlab("")
+  p <- p + ggplot2::ylab("Mean absolute score (weighted)")
+  if (isFALSE(horizontal)) {
+    p <- p + ggplot2::coord_flip()
+  }
+  p
+}
+
+
+#' @keywords internal
+#' @noRd
 ggplot_bar <- function(
     ordered_dict,
     geom = c("point", "col"),
@@ -409,6 +493,7 @@ ggplot_bar <- function(
 
 
 #' @keywords internal
+#' @noRd
 ggplot_scatter <- function(
     ordered_dict,
     mapping = NULL,
@@ -458,6 +543,7 @@ ggplot_scatter <- function(
 
 
 #' @keywords internal
+#' @noRd
 ggplot_heatmap <- function(ordered_dict, ...) {
   midpoints <- function(x) {
     x[-length(x)] + diff(x) / 2
@@ -488,4 +574,48 @@ ggplot_heatmap <- function(ordered_dict, ...) {
     ylab = ordered_dict$layout$yaxis$title$text,
     ...
   )
+}
+
+
+#' @keywords internal
+#' @noRd
+gg_plot_explanation <- function(
+    ordered_dict,
+    geom = c("point", "col"),
+    mapping = NULL,
+    aesthetics = list(),
+    horizontal = FALSE,
+    ...
+) {
+  geom <- match.arg(geom, several.ok = FALSE)
+  df <- data.frame(
+    "y" = ordered_dict$data[[1L]]$x,  # contribution to prediction
+    "x" = ordered_dict$data[[1L]]$y,
+    "z" = "Intercept"
+  )
+  df[["z"]][df[["y"]] > 0] <- "Positive"
+  df[["z"]][df[["y"]] <= 0] <- "Negative"
+  df[["z"]][df[["x"]] == "Intercept"] <- "Intercept"
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = reorder(x, y), y = y, color = z, fill = z))
+  if (geom == "col") {
+    p <- p + do.call(
+      what = ggplot2::geom_col,
+      args = c(list(mapping = mapping), aesthetics)
+    )
+  }
+  if (geom == "point") {
+    p <- p + do.call(
+      what = ggplot2::geom_point,
+      args = c(list(mapping = mapping), aesthetics)
+    )
+  }
+
+  # Add labels, titles, etc.
+  p <- p + ggplot2::theme(legend.position = "none")
+  p <- p + ggplot2::xlab("")
+  p <- p + ggplot2::ylab("Contribution to prediction")
+  if (isFALSE(horizontal)) {
+    p <- p + ggplot2::coord_flip()
+  }
+  p
 }
