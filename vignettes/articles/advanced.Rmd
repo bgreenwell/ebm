@@ -1,0 +1,202 @@
+---
+title: "Advanced usage"
+author: "Brandon M. Greenwell"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo = TRUE,
+  cache = TRUE,
+  fig.width = 6,
+  fig.asp = 0.618,
+  out.width = "70%"
+)
+```
+
+In this article, we'll explore several advanced uses of the **ebm** package through a binary classification example. In particular, we'll be using data from the [CoIL 2000 Challenge](https://liacs.leidenuniv.nl/~puttenpwhvander/library/cc2000/), which are available in the R package [kernlab](https://cran.r-project.org/package=kernlab). The data set consists of $N = 9822$ customer records containing 86 variables, including product usage data and socio-demographic data derived from zip area codes. The goal of the challenge was to be able to answer the following question: “Can you predict who would be interested in buying a caravan insurance policy and give an explanation of why?” Hence, being able to explain your model's predictions was key to being successful in this challenge.
+
+
+We'll start by loading the data fitting a default EBM classifier:
+
+```{r setup}
+library(ebm)
+library(ggplot2)
+
+theme_set(theme_bw())
+
+# Load in the data and split into train/test using predefined test set indicator
+data("ticdata", package = "kernlab")  # see `?kernlab::ticdata` for details
+ticdata$CARAVAN <- ifelse(ticdata$CARAVAN == "insurance", 1, 0)
+tictrn <- ticdata[1:5000, ]
+tictst <- ticdata[-(1:5000), ]
+
+# Build a default EBM
+fit <- ebm(CARAVAN ~ ., data = tictrn)
+plot(fit, n_features = 15)  # plot top 15 features based on mean absolute score
+```
+
+
+## Monotonic constraints
+
+While `PPERSAUT` (the contribution level for car policies) is the top predictive feature, it's also categorical and so we cannot force monotonicity here. Technically, `PPERSAUT` is ordinal so it would not be unreasonable to recode it as an integer or similar and refit the model (tree-based models tend to only differentiate between ordered and nominal features). Instead, we'll focus on the number of car policies `APERSAUT`.
+
+```{r ebm-term-APERSAUT}
+plot(fit, term = "APERSAUT")
+```
+
+Here we can see that the relationship is mostly decreasing, which seems logical. The more car policies they already own, the less likely they are to purchase another. Hence, it may make sense to force decreasing monotonicity here. While we can force monotonic constraints via the `monotone_constraints` argument in the call to `ebm()`, the original authors generally recommend forcing monotonicity by post-processing the graphs instead using isotonic regression. This can be done by calling the `$monotonize()` method on the fitted EBM object. This is the recommended approach as it prevents the model from compensating for the monotonicity constraints by learning non-monotonic effects in other highly-correlated features. 
+
+In the example below, we post-process the graph for `APERDAUT` to force negative monotonicity (`increasing = FALSE`) using isotonic regression. Notice this does change the term contributions for `APERSAUT` in the fitted model. Additionally, we lose any uncertainty associated with the feature from the outer bagging in the original model.
+
+```{r ebm-term-APERSAUT-monotonize}
+fit$monotonize("APERSAUT", increasing = FALSE)
+plot(fit, term = "APERSAUT")
+```
+
+While the **ebm** package does not expose 100% of the functionality available in Python, this example shows that you can pretty much do anything you need by interacting directly with the underlying Python objects (the magic happens through [reticulate](https://rstudio.github.io/reticulate/)). For example, to reproduce the original HTML-based visualization, which will be displayed in a browser, you can do the following:
+
+```{r ebm-term-APERSAUT-monotonize-html-noeval, eval=FALSE}
+idx <- as.integer(which(fit$term_names_ == "APERSAUT") - 1L) 
+plt <- fit$explain_global()$visualize(idx)
+plt$show()  # should open in a browser; can also call `plt$write_html("<path/to/file.html>")`
+```
+
+Details aside, you can access the data to recreate the plot (like the `plot()` method does), by coercing the internal Python plotly object to an ordered dictionary which **reticulate** will automatically convert to a list. For instance, the following snippet of code extracts the main data used in generating the previous plot.
+
+```{r ebm-term-APERSAUT-monotonize-html, echo=FALSE}
+idx <- as.integer(which(fit$term_names_ == "APERSAUT") - 1L) 
+plt <- fit$explain_global()$visualize(idx)
+```
+```{r ebm-term-APERSAUT-monotonize-list}
+plt$to_ordered_dict()$data[[1L]]
+```
+
+
+## Model compression via the LASSO
+
+Compared to "black-box" models, like random forests and deep neural networks, EBMs are considered "glass-box" models that can be competitively accurate while also maintaining a higher degree of transparency and explainability. However, EBMs become readily less transparent and harder to interpret in high-dimensional settings with many predictor variables; they also become more difficult to use in production due to increases in scoring time. We propose a simple solution based on the least absolute shrinkage and selection operator (LASSO) that can help introduce sparsity by reweighting the individual model terms and removing the less relevant ones, thereby allowing these models to maintain their transparency and relatively fast scoring times in higher-dimensional settings. In short, post-processing a fitted EBM with many (i.e., possibly hundreds or thousands) of terms using the LASSO can help reduce the model's complexity and drastically improve scoring time. For methodological (and software) details, see the associated paper on "[Explainable Boosting Machines with Sparsity---Maintaining Explainability in High-Dimensional Settings](https://arxiv.org/abs/2311.07452)."
+
+We'll illustrate the basic idea using the previous model, which contains `r length(fit$term_names_) + 1` total terms comprised of the main effects, pairwise interactions, and an intercept.
+
+```{r ebm-term-names}
+# Rebuild the previous EBM without monotonicity
+fit <- ebm(CARAVAN ~ ., data = tictrn)
+
+fit$term_names_  # does not include the intercept
+```
+
+To make things easier downstream, lets go ahead partition the data by separating the features from the response:
+
+```{r ebm-ticdata-X-y}
+X_trn <- subset(tictrn, select = -CARAVAN)  # feature columns
+X_tst <- subset(tictst, select = -CARAVAN)
+y_trn <- tictrn$CARAVAN
+y_tst <- tictst$CARAVAN
+```
+
+In the next chunk, we'll construct a data matrix of the individual term contributions for both the train and test sets. That is, each is a matrix who's $i$-th column is given by the $i$-th terms contribution to the model's output (before applying any link function, so it'll be on the logit scale in this example). In particular, note that `rowSum(terms_trn) + fit$intercept_` is equivalent to calling `predict(fit, newdata = X_trn)`. These data matrices will be used as input to the LASSO shortly after.
+
+```{r ebm-ticdata-terms}
+terms_trn <- predict(fit, newdata = X_trn, type = "terms")
+terms_tst <- predict(fit, newdata = X_tst, type = "terms")
+colnames(terms_trn) <- colnames(terms_tst) <- fit$term_names_
+
+# Sanity check
+head(cbind(
+  rowSums(terms_trn) + c(fit$intercept_),
+  predict(fit, newdata = tictrn, type = "link")  # additive on link scale
+))
+```
+
+Next, we use the [glmnet](https://cran.r-project.org/package=glmnet) package to fit the LASSO path to the new data set comprised of the individual term contributions. We then assess performance using the associated test set and collect the results.
+
+```{r ebm-ticdata-lasso}
+library(glmnet)
+
+# Fit the LASSO regularization path using the term contributions as inputs
+ebm_lasso <- glmnet(
+  x = terms_trn,        # individual term contributions/scores
+  y = y_trn,            # original response variable
+  lower.limits = 0,     # coefficients should be strictly positive
+  standardize = FALSE,  # no need to standardize
+  family = "binomial"   # logistic regression
+)
+
+# Assess performance of fit using an independent test set
+perf <- assess.glmnet(
+  object = ebm_lasso,  # fitted LASSO model
+  newx = terms_tst,    # test set contributions
+  newy = y_tst,        # same response variable (test set)
+  family = "binomial"  # for logit link (i.e., logistic regression)
+)
+perf <- do.call(cbind, args = perf)  # bind results into matrix
+
+# Data frame of results (one row for each value of lambda)
+ebm_lasso_res <- as.data.frame(cbind(
+  "num_terms" = ebm_lasso$df,  # number of non-zero coefficients for each lambda
+  perf,                        # performance metrics (i.e., deviance, auc, etc.)
+  "lambda" = ebm_lasso$lambda
+))
+
+# Sort in ascending order of number of terms
+head(ebm_lasso_res <- ebm_lasso_res[order(ebm_lasso_res$num_terms), ])
+```
+
+Next, we'll compute the `lambda` value associated with the smallest deviance (or half the log-loss):
+
+```{r ebm-ticdata-lasso-lambda}
+(lambda <- ebm_lasso_res[which.min(ebm_lasso_res$deviance), "lambda"])
+```
+
+Here are the results for the compressed EBM corresponding to this value of `lambda`:
+
+```{rebm-ticdata-lasso-results}
+ebm_lasso_results[which.min(ebm_lasso_results$deviance), ]
+```
+
+Finally, we can plot the results! On the left, we show the LASSO path and on the right we show the test deviance as a function of the number of terms in the compressed model.
+
+```{r ebm-ticdata-lassso-plot}
+par(mfrow = c(1, 2), mar = c(4, 4, 0.1, 0.1), cex.lab = 0.95, 
+    cex.axis = 0.8, mgp = c(2, 0.7, 0), tcl = -0.3, las = 1)
+palette("Okabe-Ito")
+
+# Plot results
+plot(ebm_lasso, xvar = "lambda", col = adjustcolor(3, alpha.f = 0.3))
+abline(v = log(lambda), lty = 2, col = 1)
+plot(ebm_lasso_res[, c("num_terms", "deviance")], type = "l", las = 1,
+     xlab = "Number of terms", ylab = "Test deviance")
+palette("default")
+```
+
+Lastly, we can call the `$scale()` and `$sweep()` methods to reweight and purge any unused terms from the model:
+
+```{r ebm-ticdata-lasso-scale}
+weights <- coef(ebm_lasso, s = lambda)
+weights <- setNames(as.numeric(weights), nm = rownames(weights))
+for (i in seq_along(weights[-1L])) {
+  idx <- as.integer(i - 1L)  # Sigh, Python indexing starts at 0
+  print(paste0("Replcating term ", fit$term_names_[i], " with ", names(weights)[i + 1]))
+  fit$scale(idx, factor = weights[i + 1])
+}
+fit$intercept_ <- weights[1L]
+
+# Remove unused terms!
+fit$sweep(terms = TRUE, bins = TRUE, features = FALSE)
+length(fit$term_names_)
+plot(fit)  # show new feature importance scores
+```
+
+And just as a sanity check, we can see that the compressed (i.e., reduced) model does produce the right predictions. An ROC curve via the [pROC](https://cran.r-project.org/package=pROC) is also constructed and shown below.
+
+```{r}
+# Compare predictions to LASSO fit
+head(p <- predict(fit, newdata = X_tst))
+head(predict(ebm_lasso, terms_tst, s = lambda, type = "response"))
+
+# ROC curve and AUROC statistic
+(roc <- pROC::roc(response = y_tst, predictor = p[, 2L]))
+plot(roc)
+```

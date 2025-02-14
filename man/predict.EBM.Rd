@@ -7,7 +7,7 @@
 \method{predict}{EBM}(
   object,
   newdata,
-  type = c("response", "link", "class"),
+  type = c("response", "link", "class", "terms"),
   se_fit = FALSE,
   init_score = NULL,
   ...
@@ -20,13 +20,13 @@
 
 \item{type}{The type of prediction required.}
 
+\item{se_fit}{Logical indicating whether or not standard errors are required.}
+
 \item{init_score}{Optional. Either a model that can generate scores or
 per-sample initialization score. If samples scores it should be the same
 length as \code{newdata}.}
 
 \item{...}{Additional optional arguments. (Currently ignored.)}
-
-\item{se.fit}{Logical indicating whether or not standard errors are required.}
 }
 \value{
 For regression (i.e., \code{EBMReegressor} objects), either a vector of

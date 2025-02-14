@@ -1,5 +1,6 @@
 ---
 title: "Merging models"
+author: "Brandon M. Greenwell"
 ---
 
 ```{r, include = FALSE}

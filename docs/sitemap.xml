@@ -10,6 +10,9 @@
     <loc>/LICENSE.html</loc>
   </url>
   <url>
+    <loc>/articles/advanced.html</loc>
+  </url>
+  <url>
     <loc>/articles/ebm.html</loc>
   </url>
   <url>
@@ -44,6 +47,9 @@
   </url>
   <url>
     <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/install_interpret.html</loc>
   </url>
   <url>
     <loc>/reference/merge.EBM.html</loc>

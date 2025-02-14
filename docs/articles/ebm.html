@@ -44,6 +44,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/advanced.html">Advanced usage</a>
     <a class="dropdown-item" href="../articles/interactive.html">Interactive plots</a>
     <a class="dropdown-item" href="../articles/merging.html">Merging models</a>
   </div>
@@ -79,8 +80,36 @@ progress and is subject to change as the package evolves!</p>
 <div class="section level2">
 <h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
 </h2>
-<p>TBD. Talk about setting up <strong>reticulate</strong>, package
-installation via <code>install_interpret()</code>, etc.</p>
+<p>This package requires <a href="https://rstudio.github.io/reticulate/" class="external-link">reticulate</a> and an
+appropriate Python environment with the <a href="https://github.com/interpretml/interpret/" class="external-link">interpret</a> library
+installed. If you’re not a Python user, then I’d suggest reading through
+some of the <strong>reticulate</strong> vignettes to learn more. In
+particular:</p>
+<ul>
+<li>See <code><a href="https://rstudio.github.io/reticulate/articles/versions.html" class="external-link">vignette("versions", package = "reticulate")</a></code> for
+learning more about Python version configuration.</li>
+<li>See <code><a href="https://rstudio.github.io/reticulate/articles/python_packages.html" class="external-link">vignette("python_packages", package = "reticulate")</a></code>
+for learning more about installing Python packages.</li>
+<li>See <code><a href="https://rstudio.github.io/reticulate/articles/python_primer.html" class="external-link">vignette("python_primer", package = "reticulate")</a></code>
+for learning more about interacting with Python objects through
+reticulate (this can be useful for understanding more advanced usage of
+the <strong>ebm</strong> package)</li>
+</ul>
+<p>For simplicity, this package also provides an
+<code><a href="../reference/install_interpret.html">install_interpret()</a></code> function for installing the sole Python
+library dependency; see <code>ebm::?install_interpret()</code> for
+details.</p>
+<p>The following section provides a brief overview of the
+<code><a href="../reference/ebm.html">ebm()</a></code> function. For more detailed usage and examples, read
+the following articles:</p>
+<ul>
+<li>For producing interactive plots, see
+<code><a href="../articles/interactive.html">vignette("interactive")</a></code>.</li>
+<li>For merging several fitted EBM models into one, see
+<code><a href="../articles/merging.html">vignette("merging")</a></code>.</li>
+<li>For advanced usage of the package, as well as a classification
+example, see <code><a href="../articles/advanced.html">vignette("advanced")</a></code>.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="using-the-ebm-package">Using the <strong>ebm</strong> package<a class="anchor" aria-label="anchor" href="#using-the-ebm-package"></a>
@@ -146,9 +175,9 @@ requested.</p>
 the output of <code>"EBM"</code> objects using the generic
 <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method; this function supports both global and local
 interpretations. The default simply prints a global measure of
-importance based on the sum of the absolute value of each variable sterm
-contributions. (For Markdown-type documents, like this vignette, you
-need to specify <code>display = "markdown"</code>; see
+importance based on the sum of the absolute value of each variable’s
+term contributions. (For Markdown-type documents, like this vignette,
+you need to specify <code>display = "markdown"</code>; see
 <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">?ebm::plot</a></code> for details.)</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>

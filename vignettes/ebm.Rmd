@@ -25,7 +25,19 @@ knitr::opts_chunk$set(
 
 ## Getting started
 
-TBD. Talk about setting up **reticulate**, package installation via `install_interpret()`, etc.
+This package requires [reticulate](https://rstudio.github.io/reticulate/) and an appropriate Python environment with the [interpret](https://github.com/interpretml/interpret/) library installed. If you're not a Python user, then I'd suggest reading through some of the **reticulate** vignettes to learn more. In particular:
+
+* See `vignette("versions", package = "reticulate")` for learning more about Python version configuration.
+* See `vignette("python_packages", package = "reticulate")` for learning more about installing Python packages.
+* See `vignette("python_primer", package = "reticulate")` for learning more about interacting with Python objects through reticulate (this can be useful for understanding more advanced usage of the **ebm** package)
+
+For simplicity, this package also provides an `install_interpret()` function for installing the sole Python library dependency; see `ebm::?install_interpret()` for details.
+
+The following section provides a brief overview of the `ebm()` function. For more detailed usage and examples, read the following articles:
+
+* For producing interactive plots, see `vignette("interactive")`.
+* For merging several fitted EBM models into one, see `vignette("merging")`.
+* For advanced usage of the package, as well as a classification example, see `vignette("advanced")`.
 
 
 ## Using the **ebm** package
@@ -57,7 +69,7 @@ head(predict(fit, newdata = hitters))
 # Ask for predictions and standard errors
 head(predict(fit, newdata = hitters, se_fit = TRUE))
 ```
-You can produce several [plotly](https://plotly.com/r/)-based graphs to help interpret the output of `"EBM"` objects using the generic `plot()` method; this function supports both global and local interpretations. The default simply prints a global measure of importance based on the sum of the absolute value of each variable sterm contributions. (For Markdown-type documents, like this vignette, you need to specify `display = "markdown"`; see `?ebm::plot` for details.)
+You can produce several [plotly](https://plotly.com/r/)-based graphs to help interpret the output of `"EBM"` objects using the generic `plot()` method; this function supports both global and local interpretations. The default simply prints a global measure of importance based on the sum of the absolute value of each variable's term contributions. (For Markdown-type documents, like this vignette, you need to specify `display = "markdown"`; see `?ebm::plot` for details.)
 
 ```{r ebm-regressor-show-global-importance}
 library(ggplot2)

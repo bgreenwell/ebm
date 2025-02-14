@@ -8,7 +8,7 @@
 #'
 #' @param type The type of prediction required.
 #'
-#' @param se.fit Logical indicating whether or not standard errors are required.
+#' @param se_fit Logical indicating whether or not standard errors are required.
 #'
 #' @param init_score  Optional. Either a model that can generate scores or
 #' per-sample initialization score. If samples scores it should be the same
@@ -26,9 +26,12 @@
 #' @importFrom stats predict
 #'
 #' @export
-predict.EBM <- function(object, newdata, type = c("response", "link", "class"),
+predict.EBM <- function(object, newdata, type = c("response", "link", "class", "terms"),
                         se_fit = FALSE, init_score = NULL, ...) {
   type <- match.arg(type)
+  if (type == "terms") {
+    return(object$eval_terms(newdata))
+  }
   out <- if (inherits(object, what = "EBMClassifier")) {
     if (type == "response") {
       object$predict_proba(newdata, init_score = init_score)
@@ -48,5 +51,5 @@ predict.EBM <- function(object, newdata, type = c("response", "link", "class"),
       object$predict(newdata, init_score = init_score)
     }
   }
-  out
+  return(out)
 }

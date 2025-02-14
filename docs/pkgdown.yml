@@ -2,8 +2,9 @@ pandoc: '3.2'
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
+  advanced: advanced.html
   interactive: interactive.html
   merging: merging.html
   ebm: ebm.html
-last_built: 2025-02-14T03:22Z
+last_built: 2025-02-14T17:25Z
 
