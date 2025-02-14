@@ -1,8 +1,8 @@
 ---
-title: "Introduction"
+title: "Introduction to ebm"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{intro}
+  %\VignetteIndexEntry{Introduction to ebm}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 self_contained: false
