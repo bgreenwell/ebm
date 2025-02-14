@@ -1,8 +1,4 @@
-x <- NULL
-y <- NULL
-y_error <- NULL
-y_lwr <- NULL
-y_upr <- NULL
+x <- y <- z <- y_error <- y_lwr <- y_upr <- NULL
 
 #' Interpret plots for fitted EBM objects
 #'
@@ -94,6 +90,7 @@ y_upr <- NULL
 #'
 #' @importFrom graphics dotchart
 #' @importFrom lattice levelplot
+#' @importFrom stats reorder
 #'
 #' @export
 plot.EBM <- function(

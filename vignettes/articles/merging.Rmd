@@ -1,0 +1,40 @@
+---
+title: "Merging models"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo = TRUE,
+  cache = TRUE,
+  fig.width = 6,
+  fig.asp = 0.618,
+  out.width = "70%"
+)
+```
+
+To illustrate how interactive plots work in **ebm**, we'll fit a few EBM regression models to different bootstrap samples of R's built-in `mtcars` data set. 
+
+```{r fit-ebms}
+library(ebm)
+
+# Fit multiple EBM models to different bootstrap samples
+N <- nrow(mtcars)
+set.seed(945)
+ebm1 <- ebm(mpg ~ ., data = mtcars[sample(N, replace = TRUE), ], objective = "rmse")
+ebm2 <- ebm(mpg ~ ., data = mtcars[sample(N, replace = TRUE), ], objective = "rmse")
+ebm3 <- ebm(mpg ~ ., data = mtcars[sample(N, replace = TRUE), ], objective = "rmse")
+
+# Check intercepts for comparison
+c(ebm1$intercept_, ebm2$intercept_, ebm3$intercept_)
+```
+
+Next, we'll merge these into a single model by calling the `merge()` method:
+
+```{r merge-ebms, error=FALSE}
+ebm_merged <- merge(ebm1, ebm2, ebm3)
+
+# Check intercept for comparison
+ebm_merged$intercept_
+```

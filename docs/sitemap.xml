@@ -10,10 +10,22 @@
     <loc>/LICENSE.html</loc>
   </url>
   <url>
+    <loc>/articles/ebm.html</loc>
+  </url>
+  <url>
     <loc>/articles/index.html</loc>
   </url>
   <url>
+    <loc>/articles/interactive.html</loc>
+  </url>
+  <url>
     <loc>/articles/intro.html</loc>
+  </url>
+  <url>
+    <loc>/articles/longintro.html</loc>
+  </url>
+  <url>
+    <loc>/articles/merging.html</loc>
   </url>
   <url>
     <loc>/authors.html</loc>
@@ -32,6 +44,9 @@
   </url>
   <url>
     <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/merge.EBM.html</loc>
   </url>
   <url>
     <loc>/reference/plot.EBM.html</loc>
