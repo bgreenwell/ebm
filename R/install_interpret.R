@@ -3,9 +3,16 @@
 #' This function will install interpret along with all of its dependencies.
 #'
 #' @param envname Name of or path to a Python virtual environment.
-#' @param extra_packages Additional Python packages to install alongside interpret.
-#' @param python_version Passed on to `reticulate::virtualenv_starter()`
-#' @param restart_session Whether to restart the R session after installing (note this will only occur within RStudio).
+#'
+#' @param extra_packages Additional Python packages to install alongside
+#' interpret.
+#'
+#' @param python_version Passed on to
+#' [virtualenv_starter()][reticulate::virtualenv_starter].
+#'
+#' @param restart_session Whether to restart the R session after installing
+#' (note this will only occur within RStudio).
+#'
 #' @param ... Additional optional arguments. (Currently ignored.)
 #'
 #' @returns No return value, called for side effects.

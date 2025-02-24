@@ -44,9 +44,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/advanced.html">Advanced usage</a>
-    <a class="dropdown-item" href="../articles/interactive.html">Interactive plots</a>
-    <a class="dropdown-item" href="../articles/merging.html">Merging models</a>
+    <a class="dropdown-item" href="../articles/RJwrapper.pdf">RJournal article (in progress)</a>
   </div>
 </li>
 <li class="nav-item">
@@ -102,114 +100,10 @@ the <strong>ebm</strong> package)</li>
 <code><a href="../reference/install_interpret.html">install_interpret()</a></code> function for installing the sole Python
 library dependency; see <code>ebm::?install_interpret()</code> for
 details.</p>
-<p>The following section provides a brief overview of the
-<code><a href="../reference/ebm.html">ebm()</a></code> function. For more detailed usage and examples, read
-the following articles:</p>
-<ul>
-<li>For producing interactive plots, see
-<code><a href="../articles/interactive.html">vignette("interactive")</a></code>.</li>
-<li>For merging several fitted EBM models into one, see
-<code><a href="../articles/merging.html">vignette("merging")</a></code>.</li>
-<li>For advanced usage of the package, as well as a classification
-example, see <code><a href="../articles/advanced.html">vignette("advanced")</a></code>.</li>
-</ul>
+<p>For a full overview of the <strong>ebm</strong> package, see article
+titled “RJournal article (in progress)”.</p>
 </div>
-<div class="section level2">
-<h2 id="using-the-ebm-package">Using the <strong>ebm</strong> package<a class="anchor" aria-label="anchor" href="#using-the-ebm-package"></a>
-</h2>
-<p>To illustrate the regression case, we’ll use the <code>Hitters</code>
-data from the <a href="https://cran.r-project.org/package=ISLR2" class="external-link">ISLR2</a> package. A
-sample of the data are shown below.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"Hitters"</span>, package <span class="op">=</span> <span class="st">"ISLR2"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Remove rows with missing response values</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">hitters</span> <span class="op">&lt;-</span> <span class="va">Hitters</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Hitters</span><span class="op">$</span><span class="va">Salary</span><span class="op">)</span>, <span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                   AtBat Hits HmRun Runs RBI Walks Years CAtBat CHits CHmRun</span></span>
-<span><span class="co">#&gt; -Alan Ashby         315   81     7   24  38    39    14   3449   835     69</span></span>
-<span><span class="co">#&gt; -Alvin Davis        479  130    18   66  72    76     3   1624   457     63</span></span>
-<span><span class="co">#&gt; -Andre Dawson       496  141    20   65  78    37    11   5628  1575    225</span></span>
-<span><span class="co">#&gt; -Andres Galarraga   321   87    10   39  42    30     2    396   101     12</span></span>
-<span><span class="co">#&gt; -Alfredo Griffin    594  169     4   74  51    35    11   4408  1133     19</span></span>
-<span><span class="co">#&gt; -Al Newman          185   37     1   23   8    21     2    214    42      1</span></span>
-<span><span class="co">#&gt;                   CRuns CRBI CWalks League Division PutOuts Assists Errors</span></span>
-<span><span class="co">#&gt; -Alan Ashby         321  414    375      N        W     632      43     10</span></span>
-<span><span class="co">#&gt; -Alvin Davis        224  266    263      A        W     880      82     14</span></span>
-<span><span class="co">#&gt; -Andre Dawson       828  838    354      N        E     200      11      3</span></span>
-<span><span class="co">#&gt; -Andres Galarraga    48   46     33      N        E     805      40      4</span></span>
-<span><span class="co">#&gt; -Alfredo Griffin    501  336    194      A        W     282     421     25</span></span>
-<span><span class="co">#&gt; -Al Newman           30    9     24      N        E      76     127      7</span></span>
-<span><span class="co">#&gt;                   Salary NewLeague</span></span>
-<span><span class="co">#&gt; -Alan Ashby        475.0         N</span></span>
-<span><span class="co">#&gt; -Alvin Davis       480.0         A</span></span>
-<span><span class="co">#&gt; -Andre Dawson      500.0         N</span></span>
-<span><span class="co">#&gt; -Andres Galarraga   91.5         N</span></span>
-<span><span class="co">#&gt; -Alfredo Griffin   750.0         A</span></span>
-<span><span class="co">#&gt; -Al Newman          70.0         A</span></span></code></pre></div>
-<p>We’ll start by fitting a basic <code>EBMRegressor</code> to the
-<code>hitters</code> data set using <code>Salary</code> as the response.
-Note that the <code><a href="../reference/ebm.html">ebm()</a></code> function currently only supports the
-usual R formula interface.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">ebm</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Fit a default EBM regressor</span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ebm.html">ebm</a></span><span class="op">(</span><span class="va">Salary</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">hitters</span>, objective <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
-<span><span class="va">fit</span>  <span class="co"># still need to implement print() and summary() methods</span></span>
-<span><span class="co">#&gt; ExplainableBoostingRegressor(early_stopping_tolerance=0)</span></span></code></pre></div>
-<p>You can obtain predictions using the familiar <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>
-method employed by most modeling packages in R. Note that through
-bagging, EBMs can provide standard errors for the predictions if
-requested.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit</span>, newdata <span class="op">=</span> <span class="va">hitters</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 489.4548 626.1970 870.3430 169.8797 659.6543 270.5382</span></span>
-<span></span>
-<span><span class="co"># Ask for predictions and standard errors</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit</span>, newdata <span class="op">=</span> <span class="va">hitters</span>, se_fit <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;          [,1]      [,2]</span></span>
-<span><span class="co">#&gt; [1,] 489.4548  53.92471</span></span>
-<span><span class="co">#&gt; [2,] 626.1970  98.39167</span></span>
-<span><span class="co">#&gt; [3,] 870.3430 241.04199</span></span>
-<span><span class="co">#&gt; [4,] 169.8797  43.14385</span></span>
-<span><span class="co">#&gt; [5,] 659.6543  54.02381</span></span>
-<span><span class="co">#&gt; [6,] 270.5382 155.71903</span></span></code></pre></div>
-<p>You can produce several <a href="https://plotly.com/r/" class="external-link">plotly</a>-based graphs to help interpret
-the output of <code>"EBM"</code> objects using the generic
-<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method; this function supports both global and local
-interpretations. The default simply prints a global measure of
-importance based on the sum of the absolute value of each variable’s
-term contributions. (For Markdown-type documents, like this vignette,
-you need to specify <code>display = "markdown"</code>; see
-<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">?ebm::plot</a></code> for details.)</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Plot feature importance (i.e., mean absolute scores)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, n_features <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ebm_files/figure-html/ebm-regressor-show-global-importance-1.png" width="70%"></p>
-<p>You can also plot the individual shape functions (or term
-contributions), as shown below:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, term <span class="op">=</span> <span class="st">"Years"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ebm_files/figure-html/ebm-regressor-show-global-term-1.png" width="70%"></p>
-<p>Pairwise interactions can be visualized by supplying
-<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> with an appropriate pair of variables.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, term <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hits"</span>, <span class="st">"CAtBat"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ebm_files/figure-html/ebm-regressor-show-global-term-interaction-1.png" width="70%"></p>
-<p>You can also display local explanations (though, one at a time) by
-specifying <code>local = TRUE</code>:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Understand an individual prediction</span></span>
-<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">hitters</span>, select <span class="op">=</span> <span class="op">-</span><span class="va">Salary</span><span class="op">)</span><span class="op">[</span><span class="fl">1L</span>, <span class="op">]</span>  <span class="co"># use first observation</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, local <span class="op">=</span> <span class="cn">TRUE</span>, X <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">hitters</span><span class="op">$</span><span class="va">Salary</span><span class="op">[</span><span class="fl">1L</span><span class="op">]</span>, geom <span class="op">=</span> <span class="st">"col"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ebm_files/figure-html/ebm-regressor-show-local-1.png" width="70%"></p>
-</div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
-    </nav></aside>
+  </main>
 </div>
 
 

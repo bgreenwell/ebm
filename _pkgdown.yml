@@ -1,4 +1,13 @@
 url: ~
 template:
   bootstrap: 5
+  assets: ../rjournal
+
+navbar:
+ components:
+   articles:
+    text: Articles
+    menu:
+    - text: RJournal article (in progress)
+      href: articles/RJwrapper.pdf
 

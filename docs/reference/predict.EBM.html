@@ -27,9 +27,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/advanced.html">Advanced usage</a>
-    <a class="dropdown-item" href="../articles/interactive.html">Interactive plots</a>
-    <a class="dropdown-item" href="../articles/merging.html">Merging models</a>
+    <a class="dropdown-item" href="../articles/RJwrapper.pdf">RJournal article (in progress)</a>
   </div>
 </li>
 <li class="nav-item">
@@ -74,15 +72,28 @@
 
 
 <dt>newdata</dt>
-<dd><p>A data frame in which to look for variables with which to predict.</p></dd>
+<dd><p>A data frame in which to look for variables with which to
+predict.</p></dd>
 
 
 <dt>type</dt>
-<dd><p>The type of prediction required.</p></dd>
+<dd><p>The type of prediction required. Current options include:</p><ul><li><p><code>"response"</code>: Returns predictions on the scale of the response variable.
+Thus, for a categorical outcome (i.e., binary or multiclass), a matrix of
+predicted probabilities is returned.</p></li>
+<li><p><code>"link"</code>: Returns predictions on the link scale. For a binary outcome with
+logit link, for example, this results in a vector of logits. For a multiclass
+outcome, this will return a matrix with one column for each class. Ignored
+for regression problems.</p></li>
+<li><p><code>"class"</code>: Returns a vector predicted class label for categorical outcomes.</p></li>
+<li><p><code>"terms"</code>: Returns a matrix (or list of matrices for multiclass outcomes)
+of the individual term contributions (e.g., the <code>f(x)</code>'s). Note that term
+contributions are on the link scale, where they are additive.</p></li>
+</ul></dd>
 
 
 <dt>se_fit</dt>
-<dd><p>Logical indicating whether or not standard errors are required.</p></dd>
+<dd><p>Logical indicating whether or not standard errors are required.
+Ignored for multiclass outcomes.</p></dd>
 
 
 <dt>init_score</dt>
@@ -99,13 +110,8 @@ length as <code>newdata</code>.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>For regression (i.e., <code>EBMReegressor</code> objects), either a vector of
-predictions (<code>se_fit = FALSE</code>) or a two-column matrix (<code>se = TRUE</code>) where the
-first column gives the prediction and the second column provides the
-corresponding standard error.</p>
-
-
-<p>For classification (i.e., <code>EBMClassifier</code> objects)...TBD.</p>
+<p>Either a vector, matrix, or list of result. See the <code>type</code> argument
+for details.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

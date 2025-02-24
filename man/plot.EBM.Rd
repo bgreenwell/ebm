@@ -12,7 +12,7 @@
   y = NULL,
   init_score = NULL,
   interactive = FALSE,
-  n_features = NULL,
+  n_terms = NULL,
   geom = c("point", "col"),
   mapping = NULL,
   aesthetics = list(),
@@ -28,7 +28,7 @@
 )
 }
 \arguments{
-\item{x}{An EBMClassifier or EBMRegressor object.}
+\item{x}{A fitted \code{\link[=ebm]{ebm()}} object.}
 
 \item{term}{Character string specifying which term to plot. For interaction
 effect, you can supply a pair (e.g., \code{term = c("x1", "x2")}). Default is
@@ -47,12 +47,12 @@ per-sample initialization score. If samples scores it should be the same
 length as \code{X}.}
 
 \item{interactive}{Logical indicating whether to produce an interactive plot
-based on HTML. Default is \code{FALSE}.
-(\code{type = "static"}) or interactive plot (\code{type = "plotly"})}
+based on HTML. Default is \code{FALSE}. Currently, only interactive graphics
+(i.e., \code{interactive = TRUE}) are available for multiclass outcomes.}
 
-\item{n_features}{Integer specifying the maximum number of variable
+\item{n_terms}{Integer specifying the maximum number of variable
 importance scores to plot. Default is \code{NULL} which corresponds to all
-features.}
+terms in the fitted model.}
 
 \item{geom}{Character string specifying which type of plot to construct for
 terms associated with categorical features. Current options are:

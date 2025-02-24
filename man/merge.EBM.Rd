@@ -7,8 +7,8 @@
 \method{merge}{EBM}(x, y, ...)
 }
 \arguments{
-\item{x, y}{Fitted \link{ebm} objects (i.e., objects of class \code{"EBM"}) that have
-been trained on similar data sets that have the same set of features.}
+\item{x, y}{Fitted \link{ebm} objects that have been trained on similar data sets
+that have the same set of features.}
 
 \item{...}{Additional \link{ebm} objects to be merged.}
 }
@@ -17,4 +17,18 @@ A merged \link{ebm} object.
 }
 \description{
 Merge multiple EBMs together.
+}
+\note{
+As of right now, the \code{merge()} function produces the following error
+message:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{Error in py_repr(x) :
+  AttributeError: 'ExplainableBoostingRegressor' object has no attribute 'cat_smooth'
+Run `reticulate::py_last_error()` for details.
+}\if{html}{\out{</div>}}
+
+This seems to be a bug in the underlying
+\href{https://github.com/interpretml/interpret/}{interpret}
+library and does not prevent this function from working. The error message is
+seemingly just a side effect.
 }

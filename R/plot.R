@@ -4,7 +4,7 @@ x <- y <- z <- y_error <- y_lwr <- y_upr <- NULL
 #'
 #' Provides an interactive visualization for a given explanation(s).
 #'
-#' @param x An EBMClassifier or EBMRegressor object.
+#' @param x A fitted [ebm()] object.
 #'
 #' @param term Character string specifying which term to plot. For interaction
 #' effect, you can supply a pair (e.g., `term = c("x1", "x2")`). Default is
@@ -23,12 +23,12 @@ x <- y <- z <- y_error <- y_lwr <- y_upr <- NULL
 #' length as `X`.
 #'
 #' @param interactive Logical indicating whether to produce an interactive plot
-#' based on HTML. Default is `FALSE`.
-#' (`type = "static"`) or interactive plot (`type = "plotly"`)
+#' based on HTML. Default is `FALSE`. Currently, only interactive graphics
+#' (i.e., `interactive = TRUE`) are available for multiclass outcomes.
 #'
-#' @param n_features Integer specifying the maximum number of variable
+#' @param n_terms Integer specifying the maximum number of variable
 #' importance scores to plot. Default is `NULL` which corresponds to all
-#' features.
+#' terms in the fitted model.
 #'
 #' @param geom Character string specifying which type of plot to construct for
 #' terms associated with categorical features. Current options are:
@@ -101,7 +101,7 @@ plot.EBM <- function(
     y = NULL,
     init_score = NULL,
     interactive = FALSE,
-    n_features = NULL,
+    n_terms = NULL,
     geom = c("point", "col"),
     mapping = NULL,
     aesthetics = list(),
@@ -136,7 +136,7 @@ plot.EBM <- function(
       object = x,
       term = term,
       interactive = interactive,
-      n_features = n_features,
+      n_terms = n_terms,
       geom = geom,
       mapping = mapping,
       aesthetics = aesthetics,
@@ -187,7 +187,7 @@ plot_global <- function(
     object,
     term = NULL,
     interactive = FALSE,
-    n_features = NULL,
+    n_terms = NULL,
     geom = c("point", "col"),
     mapping = NULL,
     aesthetics = list(),
@@ -208,13 +208,18 @@ plot_global <- function(
   ##############################################################################
   if (isFALSE(interactive)) {
 
+    if (object$link_ == "mlogit") {
+      stop("Only interactive graphics are supported for multiclass outcomes;",
+           " try setting `interactive = TRUE`.", call. = FALSE)
+    }
+
     if (is.null(term)) {
       # imp <- as.numeric(object$term_importances())
       # tna <- object$term_names_
       # ord <- order(imp, decreasing = FALSE)
       # dotchart(imp[ord], labels = tna[ord],
       #          xlab = "Mean absolute score (weighted)", ...)
-      gg_plot_importance(object, n_features = n_features, geom = geom,
+      gg_plot_importance(object, n_terms = n_terms, geom = geom,
                          mapping = mapping, aesthetics = aesthetics,
                          horizontal = horizontal, ...)
     } else {
@@ -321,15 +326,25 @@ plot_local <- function(
             call. = FALSE)
   }
 
-  #######
-  #
-  #######
+  ##############################################################################
+  # Static graphic
+  ##############################################################################
   if (isFALSE(interactive)) {
+
+    if (object$link_ == "mlogit") {
+      stop("Only interactive graphics are supported for multiclass outcomes;",
+           " try setting `interactive = TRUE`.", call. = FALSE)
+    }
     plt <- object$explain_local(X, y = y, init_score = init_score)$visualize(0L)  # Python plotly object
     ordered_dict <- plt$to_ordered_dict()
     gg_plot_explanation(ordered_dict, geom = geom, mapping = mapping,
                         aesthetics = aesthetics, horizontal = horizontal, ...)
+
+  ##############################################################################
+  # Plotly graphic
+  ##############################################################################
   } else {
+
     display <- match.arg(display)
 
     # Return URL of full dashboard
@@ -391,7 +406,7 @@ plot_local <- function(
 #' @noRd
 gg_plot_importance <- function(
     object,
-    n_features = NULL,
+    n_terms = NULL,
     geom = c("point", "col"),
     mapping = NULL,
     aesthetics = list(),
@@ -405,13 +420,13 @@ gg_plot_importance <- function(
   )
 
   # Determine how many features to include in the plot
-  if (!is.null(n_features)) {
-    n_features <- as.integer(n_features)[1L]  # make sure n_features is a single integer
-    if (n_features > nrow(df) || n_features < 1L) {
-      n_features <- nrow(df)
+  if (!is.null(n_terms)) {
+    n_terms <- as.integer(n_terms)[1L]  # make sure n_terms is a single integer
+    if (n_terms > nrow(df) || n_terms < 1L) {
+      n_terms <- nrow(df)
     }
     df <- df[order(df$y, decreasing = TRUE), ]
-    df <- df[seq_len(n_features), ]  # only retain num_features variable importance scores
+    df <- df[seq_len(n_terms), ]  # only retain num_features variable importance scores
   }
 
   # Generate plot
@@ -457,6 +472,7 @@ ggplot_bar <- function(
     "y" = plotly_data$y,
     "y_error" = plotly_data$error_y$array
   )
+  df$x <- factor(df$x, levels = df$x)  # maintain factor level ordering
   p <- ggplot2::ggplot(df, ggplot2::aes(x = x, y = y))
   if (geom == "col") {
     p <- p + do.call(
@@ -547,8 +563,8 @@ ggplot_heatmap <- function(ordered_dict, ...) {
   }
   plotly_data <- ordered_dict$data[[1L]]  # second component is distribution
   df <- expand.grid(
-    "x" = midpoints(plotly_data$x),
-    "y" = midpoints(plotly_data$y)
+    "x" = if (is.numeric(plotly_data$x)) midpoints(plotly_data$x) else plotly_data$x,
+    "y" = if (is.numeric(plotly_data$y)) midpoints(plotly_data$y) else plotly_data$y
   )
   df$z <- as.numeric(plotly_data$z)
   # p <- ggplot2::ggplot(df, ggplot2::aes(x = x, y = y, fill = z))

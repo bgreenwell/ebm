@@ -33,7 +33,7 @@ ebm(
   missing = "separate",
   max_leaves = 2L,
   monotone_constraints = NULL,
-  objective = c("log_loss", "rmse", "poisson_deviance",
+  objective = c("auto", "log_loss", "rmse", "poisson_deviance",
     "tweedie_deviance:variance_power=1.5", "gamma_deviance", "pseudo_huber:delta=1.0",
     "rmse_log"),
   n_jobs = -1L,
@@ -46,36 +46,53 @@ ebm(
 
 \item{data}{A data frame containing the variables in the model.}
 
-\item{max_bins}{Max number of bins per feature for the main effects stage. Default is 1024.}
+\item{max_bins}{Max number of bins per feature for the main effects stage.
+Default is 1024.}
 
-\item{max_interaction_bins}{Max number of bins per feature for interaction terms. Default is 64.}
+\item{max_interaction_bins}{Max number of bins per feature for interaction
+terms. Default is 64.}
 
-\item{interactions}{Interaction terms to be included in the model. Default is 0.9. Options are:
+\item{interactions}{Interaction terms to be included in the model. Default is
+0.9. Current options include:
 \itemize{
-\item Integer (1 <= interactions): Count of interactions to be automatically selected
-\item Percentage (interactions < 1.0): Determine the integer count of interactions by multiplying the number of features by this percentage
-\item List of numeric pairs: The pairs contain the indices of the features within each additive term. In addition to pairs, the interactions parameter accepts higher order interactions. It also accepts univariate terms which will cause the algorithm to boost the main terms at the same time as the interactions. When boosting mains at the same time as interactions, the \code{exclude} parameter should be set to \code{"mains"} and currently \code{max_bins} needs to be equal to \code{max_interaction_bins}.
+\item Integer (1 <= interactions): Count of interactions to be automatically
+selected.
+\item Percentage (interactions < 1.0): Determine the integer count of
+interactions by multiplying the number of features by this percentage.
+\item List of numeric pairs: The pairs contain the indices of the features within
+each additive term. In addition to pairs, the interactions parameter accepts
+higher order interactions. It also accepts univariate terms which will cause
+the algorithm to boost the main terms at the same time as the interactions.
+When boosting mains at the same time as interactions, the \code{exclude} parameter
+should be set to \code{"mains"} and currently \code{max_bins} needs to be equal to
+\code{max_interaction_bins}.
 }}
 
-\item{exclude}{Features or terms to be excluded. Default is NULL.}
+\item{exclude}{Features or terms to be excluded. Default is \code{NULL}.}
 
-\item{validation_size}{Validation set size. Used for early stopping during boosting, and is needed to create outer bags. Default is 0.15. Options are:
+\item{validation_size}{Validation set size. Used for early stopping during
+boosting, and is needed to create outer bags. Default is 0.15. Options are:
 \itemize{
-\item Integer (1 <= \code{validation_size}): Count of samples to put in the validation sets.
-\item Percentage (\code{validation_size} < 1.0): Percentage of the data to put in the validation sets.
-\item 0: Turns off early stopping. Outer bags have no utility. Error bounds will be eliminated.
+\item Integer (1 <= \code{validation_size}): Count of samples to put in the validation
+sets.
+\item Percentage (\code{validation_size} < 1.0): Percentage of the data to put in the
+validation sets.
+\item 0: Turns off early stopping. Outer bags have no utility. Error bounds will
 }}
 
-\item{outer_bags}{Number of outer bags. Outer bags are used to generate error bounds and help with smoothing the graphs. Default is 16.}
+\item{outer_bags}{Number of outer bags. Outer bags are used to generate error bounds and help with smoothing the graphs.}
 
-\item{inner_bags}{Number of inner bags. Default is 0.}
+\item{inner_bags}{Number of inner bags. Default is 0 which turns off inner
+bagging.}
 
-\item{learning_rate}{Learning rate for boosting. Default is 0.04.}
+\item{learning_rate}{Learning rate for boosting. Deafult is 0.04.}
 
-\item{greedy_ratio}{The proportion of greedy boosting steps relative to cyclic boosting steps. A value of 0 disables greedy boosting, effectively turning it off. Default is 10.0.}
+\item{greedy_ratio}{The proportion of greedy boosting steps relative to
+cyclic boosting steps. A value of 0 disables greedy boosting, effectively
+turning it off. Default is 10.}
 
 \item{cyclic_progress}{This parameter specifies the proportion of the
-boosting cycles that will actively contribute to improving the model’s
+boosting cycles that will actively contribute to improving the model's
 performance. It is expressed as a logical or numeric between 0 and 1, with
 the default set to \code{TRUE} (1.0), meaning 100\% of the cycles are expected to
 make forward progress. If forward progress is not achieved during a cycle,
@@ -84,54 +101,126 @@ gain calculations related to how effective each feature is in predicting the
 target variable. Setting this parameter to a value less than 1.0 can be
 useful for preventing overfitting. Default is \code{FALSE}.}
 
-\item{smoothing_rounds}{Number of initial highly regularized rounds to set the basic shape of the main effect feature graphs. Default is 500.}
+\item{smoothing_rounds}{Number of initial highly regularized rounds to set
+the basic shape of the main effect feature graphs. Default is 500.}
 
-\item{interaction_smoothing_rounds}{Number of initial highly regularized rounds to set the basic shape of the interaction effect feature graphs during fitting. Default is 100.}
+\item{interaction_smoothing_rounds}{Number of initial highly regularized
+rounds to set the basic shape of the interaction effect feature graphs during
+fitting. Default is 100.}
 
-\item{max_rounds}{Total number of boosting rounds with \code{n_terms} boosting steps per round. Default is 25000.}
+\item{max_rounds}{Total number of boosting rounds with \code{n_terms} boosting
+steps per round. Default is 25000.}
 
-\item{early_stopping_rounds}{Number of rounds with no improvement to trigger early stopping. 0 turns off early stopping and boosting will occur for exactly \code{max_rounds}. Default is 100.}
+\item{early_stopping_rounds}{Number of rounds with no improvement to trigger
+early stopping. 0 turns off early stopping and boosting will occur for
+exactly \code{max_rounds}. Default is 100.}
 
-\item{early_stopping_tolerance}{Tolerance that dictates the smallest delta required to be considered an improvement which prevents the algorithm from early stopping. \code{early_stopping_tolerance} is expressed as a percentage of the early stopping metric. Negative values indicate that the individual models should be overfit before stopping. EBMs are a bagged ensemble of models. Setting the \code{early_stopping_tolerance} to zero (or even negative), allows learning to overfit each of the individual models a little, which can improve the accuracy of the ensemble as a whole. Overfitting each of the individual models reduces the bias of each model at the expense of increasing the variance (due to overfitting) of the individual models. But averaging the models in the ensemble reduces variance without much change in bias. Since the goal is to find the optimum bias-variance tradeoff for the ensemble of models---not the individual models---a small amount of overfitting of the individual models can improve the accuracy of the ensemble as a whole. Default is 1e-05.}
+\item{early_stopping_tolerance}{Tolerance that dictates the smallest delta
+required to be considered an improvement which prevents the algorithm from
+early stopping. \code{early_stopping_tolerance} is expressed as a percentage of
+the early stopping metric. Negative values indicate that the individual
+models should be overfit before stopping. EBMs are a bagged ensemble of
+models. Setting the \code{early_stopping_tolerance} to zero (or even negative),
+allows learning to overfit each of the individual models a little, which can
+improve the accuracy of the ensemble as a whole. Overfitting each of the
+individual models reduces the bias of each model at the expense of increasing
+the variance (due to overfitting) of the individual models. But averaging the
+models in the ensemble reduces variance without much change in bias. Since
+the goal is to find the optimum bias-variance tradeoff for the ensemble of
+models---not the individual models---a small amount of overfitting of the
+individual models can improve the accuracy of the ensemble as a whole.
+Default is 1e-05.}
 
-\item{min_samples_leaf}{Minimum number of samples allowed in the leaves. Default is 4.}
+\item{min_samples_leaf}{Minimum number of samples allowed in the leaves.
+Default is 4.}
 
-\item{min_hessian}{Minimum hessian required to consider a potential split valid. Default is 0.0.}
+\item{min_hessian}{Minimum hessian required to consider a potential split
+valid. Default is 0.0.}
 
 \item{reg_alpha}{L1 regularization. Default is 0.0.}
 
 \item{reg_lambda}{L2 regularization. Default is 0.0.}
 
-\item{max_delta_step}{Used to limit the max output of tree leaves. <=0.0 means no constraint. Default is 0.0.}
+\item{max_delta_step}{Used to limit the max output of tree leaves; <=0.0
+means no constraint. Default is 0.0.}
 
-\item{gain_scale}{Scale factor to apply to nominal categoricals. A scale factor above 1.0 will cause the algorithm focus more on the nominal categoricals. Default is 5.0.}
+\item{gain_scale}{Scale factor to apply to nominal categoricals. A scale
+factor above 1.0 will cause the algorithm focus more on the nominal
+categoricals. Default is 5.0.}
 
-\item{min_cat_samples}{Minimum number of samples in order to treat a category separately. If lower than this threshold the category is combined with other categories that have low numbers of samples. Default is 10.}
+\item{min_cat_samples}{Minimum number of samples in order to treat a category
+separately. If lower than this threshold the category is combined with other
+categories that have low numbers of samples. Default is 10.}
 
-\item{cat_smooth}{Used for the categorical features. This can reduce the effect of noises in categorical features, especially for categories with limited data. Default is 10.0.}
+\item{cat_smooth}{Used for the categorical features. This can reduce the
+effect of noises in categorical features, especially for categories with
+limited data. Default is 10.0.}
 
-\item{missing}{Method for handling missing values during boosting. Default is \code{"separate"}. The placement of the missing value bin can influence the resulting model graphs. For example, placing the bin on the “low” side may cause missing values to affect lower bins, and vice versa. This parameter does not affect the final placement of the missing bin in the model (the missing bin will remain at index 0 in the \code{term_scores_} attribute). Possible values for missing are:
+\item{missing}{Method for handling missing values during boosting. Default is
+\code{"separate"}. The placement of the missing value bin can influence the
+resulting model graphs. For example, placing the bin on the "low" side may
+cause missing values to affect lower bins, and vice versa. This parameter
+does not affect the final placement of the missing bin in the model (the
+missing bin will remain at index 0 in the \code{term_scores_} attribute). Possible
+values for missing are:
 \itemize{
 \item \code{"low"}: Place the missing bin on the left side of the graphs.
 \item \code{"high"}: Place the missing bin on the right side of the graphs.
-\item \code{"separate"}: Place the missing bin in its own leaf during each boosting step, effectively making it location-agnostic. This can lead to overfitting, especially when the proportion of missing values is small.
-\item \code{"gain"}: Choose the best leaf for the missing value contribution at each boosting step, based on gain.
+\item \code{"separate"}: Place the missing bin in its own leaf during each boosting
+step, effectively making it location-agnostic. This can lead to overfitting,
+especially when the proportion of missing values is small.
+\item \code{"gain"}: Choose the best leaf for the missing value contribution at each
+boosting step, based on gain.
 }}
 
-\item{max_leaves}{Maximum number of leaves allowed in each tree. Default is 2.}
+\item{max_leaves}{Maximum number of leaves allowed in each tree.
+Default is 2.}
 
-\item{monotone_constraints}{Default is NULL. This parameter allows you to specify monotonic constraints for each feature's relationship with the target variable during model fitting. However, it is generally recommended to apply monotonic constraints post-fit using the \code{monotonize()} attribute rather than setting them during the fitting process. This recommendation is based on the observation that, during fitting, the boosting algorithm may compensate for a monotone constraint on one feature by utilizing another correlated feature, potentially obscuring any monotonic violations. If you choose to define monotone constraints, \code{monotone_constraints} should be a numeric vector with a length equal to the number of features. Each element in the list corresponds to a feature and should take one of the following values:
+\item{monotone_constraints}{Default is NULL. This parameter allows you to
+specify monotonic constraints for each feature's relationship with the target
+variable during model fitting. However, it is generally recommended to apply
+monotonic constraints post-fit using the \code{monotonize()} attribute rather than
+setting them during the fitting process. This recommendation is based on the
+observation that, during fitting, the boosting algorithm may compensate for a
+monotone constraint on one feature by utilizing another correlated feature,
+potentially obscuring any monotonic violations. If you choose to define
+monotone constraints, \code{monotone_constraints} should be a numeric vector with
+a length equal to the number of features. Each element in the list
+corresponds to a feature and should take one of the following values:
 \itemize{
-\item 0: No monotonic constraint is imposed on the corresponding feature’s partial response.
-\item +1: The partial response of the corresponding feature should be monotonically increasing with respect to the target.
-\item -1: The partial response of the corresponding feature should be monotonically decreasing with respect to the target.
+\item 0: No monotonic constraint is imposed on the corresponding feature's
+partial response.
+\item +1: The partial response of the corresponding feature should be
+monotonically increasing with respect to the target.
+\item -1: The partial response of the corresponding feature should be
+monotonically decreasing with respect to the target.
 }}
 
-\item{objective}{The objective function to optimize. Default is \code{"log_loss"} for classification and \code{"rmse"} for regression.}
+\item{objective}{The objective function to optimize. Current options include:
+\itemize{
+\item \code{"auto"} (try to determine automatically between \code{"log_loss"} and \code{"rmse"}).
+\item \code{"rmse"} (root mean squared error).
+\item \code{"poisson_deviance"} (e.g., for counts or non-negative integers).
+\item \code{"tweedie_deviance:variance_power=1.5"} (e.g., for modeling total loss in
+insurance applications).
+\item \code{"gamma_deviance"} (e.g., for positive continuous response).
+\item \code{"pseudo_huber:delta=1.0"} (e.g., for robust regression).
+\item \code{"rmse_log"} (\code{"rmse"} with a log link function).
+}
 
-\item{n_jobs}{Number of jobs to run in parallel. Default is -1. Negative integers are interpreted as following \href{https://github.com/joblib/joblib}{joblib}'s formula (\code{n_cpus + 1 + n_jobs}), just like \href{https://scikit-learn.org/stable/}{scikit-learn}. For example, \code{n_jobs = -2} means using all threads except 1.}
+Default is \code{"auto"} which assumes \code{"log_loss"} if the response is a factor or
+character string and \code{"rmse"} otherwise. It's a good idea to always
+explicitly set this argument.}
 
-\item{random_state}{Random state. Setting to \code{NULL} generates non-repeatable sequences.}
+\item{n_jobs}{Number of jobs to run in parallel. Default is -1. Negative
+integers are interpreted as following
+\href{https://github.com/joblib/joblib}{joblib}'s formula (\code{n_cpus + 1 + n_jobs}),
+just like \href{https://scikit-learn.org/stable/}{scikit-learn}. For example,
+\code{n_jobs = -2} means using all threads except 1.}
+
+\item{random_state}{Random state. Setting to \code{NULL} generates non-repeatable
+sequences. Default is 42 to remain consistent with the corresponding Python
+module.}
 
 \item{...}{Additional optional argument. (Currently ignored.)}
 }
@@ -169,4 +258,5 @@ blackbox models while remaining completely interpretable.
   x <- subset(hitters, select = -Salary)[1L, ]  # use first observation
   ebm_show(fit, local = TRUE, X = x, y = hitters$Salary[1L])
 }
+
 }

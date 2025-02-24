@@ -16,11 +16,26 @@
 \arguments{
 \item{object}{A fitted \link{ebm} object.}
 
-\item{newdata}{A data frame in which to look for variables with which to predict.}
+\item{newdata}{A data frame in which to look for variables with which to
+predict.}
 
-\item{type}{The type of prediction required.}
+\item{type}{The type of prediction required. Current options include:
+\itemize{
+\item \code{"response"}: Returns predictions on the scale of the response variable.
+Thus, for a categorical outcome (i.e., binary or multiclass), a matrix of
+predicted probabilities is returned.
+\item \code{"link"}: Returns predictions on the link scale. For a binary outcome with
+logit link, for example, this results in a vector of logits. For a multiclass
+outcome, this will return a matrix with one column for each class. Ignored
+for regression problems.
+\item \code{"class"}: Returns a vector predicted class label for categorical outcomes.
+\item \code{"terms"}: Returns a matrix (or list of matrices for multiclass outcomes)
+of the individual term contributions (e.g., the \code{f(x)}'s). Note that term
+contributions are on the link scale, where they are additive.
+}}
 
-\item{se_fit}{Logical indicating whether or not standard errors are required.}
+\item{se_fit}{Logical indicating whether or not standard errors are required.
+Ignored for multiclass outcomes.}
 
 \item{init_score}{Optional. Either a model that can generate scores or
 per-sample initialization score. If samples scores it should be the same
@@ -29,12 +44,8 @@ length as \code{newdata}.}
 \item{...}{Additional optional arguments. (Currently ignored.)}
 }
 \value{
-For regression (i.e., \code{EBMReegressor} objects), either a vector of
-predictions (\code{se_fit = FALSE}) or a two-column matrix (\code{se = TRUE}) where the
-first column gives the prediction and the second column provides the
-corresponding standard error.
-
-For classification (i.e., \code{EBMClassifier} objects)...TBD.
+Either a vector, matrix, or list of result. See the \code{type} argument
+for details.
 }
 \description{
 Compute predicted values from a fitted explainable boosting machine.

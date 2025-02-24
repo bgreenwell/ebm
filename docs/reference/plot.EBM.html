@@ -27,9 +27,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/advanced.html">Advanced usage</a>
-    <a class="dropdown-item" href="../articles/interactive.html">Interactive plots</a>
-    <a class="dropdown-item" href="../articles/merging.html">Merging models</a>
+    <a class="dropdown-item" href="../articles/RJwrapper.pdf">RJournal article (in progress)</a>
   </div>
 </li>
 <li class="nav-item">
@@ -65,7 +63,7 @@
 <span>  y <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  init_score <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  interactive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  n_features <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_terms <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  geom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"point"</span>, <span class="st">"col"</span><span class="op">)</span>,</span>
 <span>  mapping <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  aesthetics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -84,7 +82,7 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>An EBMClassifier or EBMRegressor object.</p></dd>
+<dd><p>A fitted <code><a href="ebm.html">ebm()</a></code> object.</p></dd>
 
 
 <dt>term</dt>
@@ -115,14 +113,14 @@ length as <code>X</code>.</p></dd>
 
 <dt>interactive</dt>
 <dd><p>Logical indicating whether to produce an interactive plot
-based on HTML. Default is <code>FALSE</code>.
-(<code>type = "static"</code>) or interactive plot (<code>type = "plotly"</code>)</p></dd>
+based on HTML. Default is <code>FALSE</code>. Currently, only interactive graphics
+(i.e., <code>interactive = TRUE</code>) are available for multiclass outcomes.</p></dd>
 
 
-<dt>n_features</dt>
+<dt>n_terms</dt>
 <dd><p>Integer specifying the maximum number of variable
 importance scores to plot. Default is <code>NULL</code> which corresponds to all
-features.</p></dd>
+terms in the fitted model.</p></dd>
 
 
 <dt>geom</dt>

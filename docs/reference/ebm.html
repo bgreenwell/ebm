@@ -37,9 +37,7 @@ blackbox models while remaining completely interpretable."><!-- mathjax --><scri
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/advanced.html">Advanced usage</a>
-    <a class="dropdown-item" href="../articles/interactive.html">Interactive plots</a>
-    <a class="dropdown-item" href="../articles/merging.html">Merging models</a>
+    <a class="dropdown-item" href="../articles/RJwrapper.pdf">RJournal article (in progress)</a>
   </div>
 </li>
 <li class="nav-item">
@@ -100,7 +98,7 @@ blackbox models while remaining completely interpretable.</p>
 <span>  missing <span class="op">=</span> <span class="st">"separate"</span>,</span>
 <span>  max_leaves <span class="op">=</span> <span class="fl">2L</span>,</span>
 <span>  monotone_constraints <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  objective <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"log_loss"</span>, <span class="st">"rmse"</span>, <span class="st">"poisson_deviance"</span>,</span>
+<span>  objective <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"log_loss"</span>, <span class="st">"rmse"</span>, <span class="st">"poisson_deviance"</span>,</span>
 <span>    <span class="st">"tweedie_deviance:variance_power=1.5"</span>, <span class="st">"gamma_deviance"</span>, <span class="st">"pseudo_huber:delta=1.0"</span>,</span>
 <span>    <span class="st">"rmse_log"</span><span class="op">)</span>,</span>
 <span>  n_jobs <span class="op">=</span> <span class="op">-</span><span class="fl">1L</span>,</span>
@@ -120,50 +118,43 @@ blackbox models while remaining completely interpretable.</p>
 
 
 <dt>max_bins</dt>
-<dd><p>Max number of bins per feature for the main effects stage. Default is 1024.</p></dd>
+<dd><p>Max number of bins per feature for the main effects stage.
+Default is 1024.</p></dd>
 
 
 <dt>max_interaction_bins</dt>
-<dd><p>Max number of bins per feature for interaction terms. Default is 64.</p></dd>
+<dd><p>Max number of bins per feature for interaction
+terms. Default is 64.</p></dd>
 
 
 <dt>interactions</dt>
-<dd><p>Interaction terms to be included in the model. Default is 0.9. Options are:</p><ul><li><p>Integer (1 &lt;= interactions): Count of interactions to be automatically selected</p></li>
-<li><p>Percentage (interactions &lt; 1.0): Determine the integer count of interactions by multiplying the number of features by this percentage</p></li>
-<li><p>List of numeric pairs: The pairs contain the indices of the features within each additive term. In addition to pairs, the interactions parameter accepts higher order interactions. It also accepts univariate terms which will cause the algorithm to boost the main terms at the same time as the interactions. When boosting mains at the same time as interactions, the <code>exclude</code> parameter should be set to <code>"mains"</code> and currently <code>max_bins</code> needs to be equal to <code>max_interaction_bins</code>.</p></li>
+<dd><p>Interaction terms to be included in the model. Default is
+0.9. Current options include:</p><ul><li><p>Integer (1 &lt;= interactions): Count of interactions to be automatically
+selected.</p></li>
+<li><p>Percentage (interactions &lt; 1.0): Determine the integer count of
+interactions by multiplying the number of features by this percentage.</p></li>
+<li><p>List of numeric pairs: The pairs contain the indices of the features within
+each additive term. In addition to pairs, the interactions parameter accepts
+higher order interactions. It also accepts univariate terms which will cause
+the algorithm to boost the main terms at the same time as the interactions.
+When boosting mains at the same time as interactions, the <code>exclude</code> parameter
+should be set to <code>"mains"</code> and currently <code>max_bins</code> needs to be equal to
+<code>max_interaction_bins</code>.</p></li>
 </ul></dd>
 
 
 <dt>exclude</dt>
-<dd><p>Features or terms to be excluded. Default is NULL.</p></dd>
+<dd><p>Features or terms to be excluded. Default is <code>NULL</code>.</p></dd>
 
 
 <dt>validation_size</dt>
-<dd><p>Validation set size. Used for early stopping during boosting, and is needed to create outer bags. Default is 0.15. Options are:</p><ul><li><p>Integer (1 &lt;= <code>validation_size</code>): Count of samples to put in the validation sets.</p></li>
-<li><p>Percentage (<code>validation_size</code> &lt; 1.0): Percentage of the data to put in the validation sets.</p></li>
-<li><p>0: Turns off early stopping. Outer bags have no utility. Error bounds will be eliminated.</p></li>
-</ul></dd>
-
-
-<dt>outer_bags</dt>
-<dd><p>Number of outer bags. Outer bags are used to generate error bounds and help with smoothing the graphs. Default is 16.</p></dd>
-
-
-<dt>inner_bags</dt>
-<dd><p>Number of inner bags. Default is 0.</p></dd>
-
-
-<dt>learning_rate</dt>
-<dd><p>Learning rate for boosting. Default is 0.04.</p></dd>
-
-
-<dt>greedy_ratio</dt>
-<dd><p>The proportion of greedy boosting steps relative to cyclic boosting steps. A value of 0 disables greedy boosting, effectively turning it off. Default is 10.0.</p></dd>
-
-
-<dt>cyclic_progress</dt>
-<dd><p>This parameter specifies the proportion of the
-boosting cycles that will actively contribute to improving the model’s
+<dd><p>Validation set size. Used for early stopping during
+boosting, and is needed to create outer bags. Default is 0.15. Options are:</p><ul><li><p>Integer (1 &lt;= <code>validation_size</code>): Count of samples to put in the validation
+sets.</p></li>
+<li><p>Percentage (<code>validation_size</code> &lt; 1.0): Percentage of the data to put in the
+validation sets.</p></li>
+<li><p>0: Turns off early stopping. Outer bags have no utility. Error bounds will</p></li>
+</ul><p>boosting cycles that will actively contribute to improving the model's
 performance. It is expressed as a logical or numeric between 0 and 1, with
 the default set to <code>TRUE</code> (1.0), meaning 100% of the cycles are expected to
 make forward progress. If forward progress is not achieved during a cycle,
@@ -174,31 +165,53 @@ useful for preventing overfitting. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt>smoothing_rounds</dt>
-<dd><p>Number of initial highly regularized rounds to set the basic shape of the main effect feature graphs. Default is 500.</p></dd>
+<dd><p>Number of initial highly regularized rounds to set
+the basic shape of the main effect feature graphs. Default is 500.</p></dd>
 
 
 <dt>interaction_smoothing_rounds</dt>
-<dd><p>Number of initial highly regularized rounds to set the basic shape of the interaction effect feature graphs during fitting. Default is 100.</p></dd>
+<dd><p>Number of initial highly regularized
+rounds to set the basic shape of the interaction effect feature graphs during
+fitting. Default is 100.</p></dd>
 
 
 <dt>max_rounds</dt>
-<dd><p>Total number of boosting rounds with <code>n_terms</code> boosting steps per round. Default is 25000.</p></dd>
+<dd><p>Total number of boosting rounds with <code>n_terms</code> boosting
+steps per round. Default is 25000.</p></dd>
 
 
 <dt>early_stopping_rounds</dt>
-<dd><p>Number of rounds with no improvement to trigger early stopping. 0 turns off early stopping and boosting will occur for exactly <code>max_rounds</code>. Default is 100.</p></dd>
+<dd><p>Number of rounds with no improvement to trigger
+early stopping. 0 turns off early stopping and boosting will occur for
+exactly <code>max_rounds</code>. Default is 100.</p></dd>
 
 
 <dt>early_stopping_tolerance</dt>
-<dd><p>Tolerance that dictates the smallest delta required to be considered an improvement which prevents the algorithm from early stopping. <code>early_stopping_tolerance</code> is expressed as a percentage of the early stopping metric. Negative values indicate that the individual models should be overfit before stopping. EBMs are a bagged ensemble of models. Setting the <code>early_stopping_tolerance</code> to zero (or even negative), allows learning to overfit each of the individual models a little, which can improve the accuracy of the ensemble as a whole. Overfitting each of the individual models reduces the bias of each model at the expense of increasing the variance (due to overfitting) of the individual models. But averaging the models in the ensemble reduces variance without much change in bias. Since the goal is to find the optimum bias-variance tradeoff for the ensemble of models---not the individual models---a small amount of overfitting of the individual models can improve the accuracy of the ensemble as a whole. Default is 1e-05.</p></dd>
+<dd><p>Tolerance that dictates the smallest delta
+required to be considered an improvement which prevents the algorithm from
+early stopping. <code>early_stopping_tolerance</code> is expressed as a percentage of
+the early stopping metric. Negative values indicate that the individual
+models should be overfit before stopping. EBMs are a bagged ensemble of
+models. Setting the <code>early_stopping_tolerance</code> to zero (or even negative),
+allows learning to overfit each of the individual models a little, which can
+improve the accuracy of the ensemble as a whole. Overfitting each of the
+individual models reduces the bias of each model at the expense of increasing
+the variance (due to overfitting) of the individual models. But averaging the
+models in the ensemble reduces variance without much change in bias. Since
+the goal is to find the optimum bias-variance tradeoff for the ensemble of
+models---not the individual models---a small amount of overfitting of the
+individual models can improve the accuracy of the ensemble as a whole.
+Default is 1e-05.</p></dd>
 
 
 <dt>min_samples_leaf</dt>
-<dd><p>Minimum number of samples allowed in the leaves. Default is 4.</p></dd>
+<dd><p>Minimum number of samples allowed in the leaves.
+Default is 4.</p></dd>
 
 
 <dt>min_hessian</dt>
-<dd><p>Minimum hessian required to consider a potential split valid. Default is 0.0.</p></dd>
+<dd><p>Minimum hessian required to consider a potential split
+valid. Default is 0.0.</p></dd>
 
 
 <dt>reg_alpha</dt>
@@ -210,50 +223,96 @@ useful for preventing overfitting. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt>max_delta_step</dt>
-<dd><p>Used to limit the max output of tree leaves. &lt;=0.0 means no constraint. Default is 0.0.</p></dd>
+<dd><p>Used to limit the max output of tree leaves; &lt;=0.0
+means no constraint. Default is 0.0.</p></dd>
 
 
 <dt>gain_scale</dt>
-<dd><p>Scale factor to apply to nominal categoricals. A scale factor above 1.0 will cause the algorithm focus more on the nominal categoricals. Default is 5.0.</p></dd>
+<dd><p>Scale factor to apply to nominal categoricals. A scale
+factor above 1.0 will cause the algorithm focus more on the nominal
+categoricals. Default is 5.0.</p></dd>
 
 
 <dt>min_cat_samples</dt>
-<dd><p>Minimum number of samples in order to treat a category separately. If lower than this threshold the category is combined with other categories that have low numbers of samples. Default is 10.</p></dd>
+<dd><p>Minimum number of samples in order to treat a category
+separately. If lower than this threshold the category is combined with other
+categories that have low numbers of samples. Default is 10.</p></dd>
 
 
 <dt>cat_smooth</dt>
-<dd><p>Used for the categorical features. This can reduce the effect of noises in categorical features, especially for categories with limited data. Default is 10.0.</p></dd>
+<dd><p>Used for the categorical features. This can reduce the
+effect of noises in categorical features, especially for categories with
+limited data. Default is 10.0.</p></dd>
 
 
 <dt>missing</dt>
-<dd><p>Method for handling missing values during boosting. Default is <code>"separate"</code>. The placement of the missing value bin can influence the resulting model graphs. For example, placing the bin on the “low” side may cause missing values to affect lower bins, and vice versa. This parameter does not affect the final placement of the missing bin in the model (the missing bin will remain at index 0 in the <code>term_scores_</code> attribute). Possible values for missing are:</p><ul><li><p><code>"low"</code>: Place the missing bin on the left side of the graphs.</p></li>
+<dd><p>Method for handling missing values during boosting. Default is
+<code>"separate"</code>. The placement of the missing value bin can influence the
+resulting model graphs. For example, placing the bin on the "low" side may
+cause missing values to affect lower bins, and vice versa. This parameter
+does not affect the final placement of the missing bin in the model (the
+missing bin will remain at index 0 in the <code>term_scores_</code> attribute). Possible
+values for missing are:</p><ul><li><p><code>"low"</code>: Place the missing bin on the left side of the graphs.</p></li>
 <li><p><code>"high"</code>: Place the missing bin on the right side of the graphs.</p></li>
-<li><p><code>"separate"</code>: Place the missing bin in its own leaf during each boosting step, effectively making it location-agnostic. This can lead to overfitting, especially when the proportion of missing values is small.</p></li>
-<li><p><code>"gain"</code>: Choose the best leaf for the missing value contribution at each boosting step, based on gain.</p></li>
+<li><p><code>"separate"</code>: Place the missing bin in its own leaf during each boosting
+step, effectively making it location-agnostic. This can lead to overfitting,
+especially when the proportion of missing values is small.</p></li>
+<li><p><code>"gain"</code>: Choose the best leaf for the missing value contribution at each
+boosting step, based on gain.</p></li>
 </ul></dd>
 
 
 <dt>max_leaves</dt>
-<dd><p>Maximum number of leaves allowed in each tree. Default is 2.</p></dd>
+<dd><p>Maximum number of leaves allowed in each tree.
+Default is 2.</p></dd>
 
 
 <dt>monotone_constraints</dt>
-<dd><p>Default is NULL. This parameter allows you to specify monotonic constraints for each feature's relationship with the target variable during model fitting. However, it is generally recommended to apply monotonic constraints post-fit using the <code>monotonize()</code> attribute rather than setting them during the fitting process. This recommendation is based on the observation that, during fitting, the boosting algorithm may compensate for a monotone constraint on one feature by utilizing another correlated feature, potentially obscuring any monotonic violations. If you choose to define monotone constraints, <code>monotone_constraints</code> should be a numeric vector with a length equal to the number of features. Each element in the list corresponds to a feature and should take one of the following values:</p><ul><li><p>0: No monotonic constraint is imposed on the corresponding feature’s partial response.</p></li>
-<li><p>+1: The partial response of the corresponding feature should be monotonically increasing with respect to the target.</p></li>
-<li><p>-1: The partial response of the corresponding feature should be monotonically decreasing with respect to the target.</p></li>
+<dd><p>Default is NULL. This parameter allows you to
+specify monotonic constraints for each feature's relationship with the target
+variable during model fitting. However, it is generally recommended to apply
+monotonic constraints post-fit using the <code>monotonize()</code> attribute rather than
+setting them during the fitting process. This recommendation is based on the
+observation that, during fitting, the boosting algorithm may compensate for a
+monotone constraint on one feature by utilizing another correlated feature,
+potentially obscuring any monotonic violations. If you choose to define
+monotone constraints, <code>monotone_constraints</code> should be a numeric vector with
+a length equal to the number of features. Each element in the list
+corresponds to a feature and should take one of the following values:</p><ul><li><p>0: No monotonic constraint is imposed on the corresponding feature's
+partial response.</p></li>
+<li><p>+1: The partial response of the corresponding feature should be
+monotonically increasing with respect to the target.</p></li>
+<li><p>-1: The partial response of the corresponding feature should be
+monotonically decreasing with respect to the target.</p></li>
 </ul></dd>
 
 
 <dt>objective</dt>
-<dd><p>The objective function to optimize. Default is <code>"log_loss"</code> for classification and <code>"rmse"</code> for regression.</p></dd>
+<dd><p>The objective function to optimize. Current options include:</p><ul><li><p><code>"auto"</code> (try to determine automatically between <code>"log_loss"</code> and <code>"rmse"</code>).</p></li>
+<li><p><code>"rmse"</code> (root mean squared error).</p></li>
+<li><p><code>"poisson_deviance"</code> (e.g., for counts or non-negative integers).</p></li>
+<li><p><code>"tweedie_deviance:variance_power=1.5"</code> (e.g., for modeling total loss in
+insurance applications).</p></li>
+<li><p><code>"gamma_deviance"</code> (e.g., for positive continuous response).</p></li>
+<li><p><code>"pseudo_huber:delta=1.0"</code> (e.g., for robust regression).</p></li>
+<li><p><code>"rmse_log"</code> (<code>"rmse"</code> with a log link function).</p></li>
+</ul><p>Default is <code>"auto"</code> which assumes <code>"log_loss"</code> if the response is a factor or
+character string and <code>"rmse"</code> otherwise. It's a good idea to always
+explicitly set this argument.</p></dd>
 
 
 <dt>n_jobs</dt>
-<dd><p>Number of jobs to run in parallel. Default is -1. Negative integers are interpreted as following <a href="https://github.com/joblib/joblib" class="external-link">joblib</a>'s formula (<code>n_cpus + 1 + n_jobs</code>), just like <a href="https://scikit-learn.org/stable/" class="external-link">scikit-learn</a>. For example, <code>n_jobs = -2</code> means using all threads except 1.</p></dd>
+<dd><p>Number of jobs to run in parallel. Default is -1. Negative
+integers are interpreted as following
+<a href="https://github.com/joblib/joblib" class="external-link">joblib</a>'s formula (<code>n_cpus + 1 + n_jobs</code>),
+just like <a href="https://scikit-learn.org/stable/" class="external-link">scikit-learn</a>. For example,
+<code>n_jobs = -2</code> means using all threads except 1.</p></dd>
 
 
 <dt>random_state</dt>
-<dd><p>Random state. Setting to <code>NULL</code> generates non-repeatable sequences.</p></dd>
+<dd><p>Random state. Setting to <code>NULL</code> generates non-repeatable
+sequences. Default is 42 to remain consistent with the corresponding Python
+module.</p></dd>
 
 
 <dt>...</dt>
@@ -291,6 +350,7 @@ useful for preventing overfitting. Default is <code>FALSE</code>.</p></dd>
 <span class="r-in"><span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">hitters</span>, select <span class="op">=</span> <span class="op">-</span><span class="va">Salary</span><span class="op">)</span><span class="op">[</span><span class="fl">1L</span>, <span class="op">]</span>  <span class="co"># use first observation</span></span></span>
 <span class="r-in"><span>  <span class="fu">ebm_show</span><span class="op">(</span><span class="va">fit</span>, local <span class="op">=</span> <span class="cn">TRUE</span>, X <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">hitters</span><span class="op">$</span><span class="va">Salary</span><span class="op">[</span><span class="fl">1L</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

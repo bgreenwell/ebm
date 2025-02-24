@@ -2,12 +2,24 @@
 #'
 #' Merge multiple EBMs together.
 #'
-#' @param x,y Fitted [ebm] objects (i.e., objects of class `"EBM"`) that have
-#' been trained on similar data sets that have the same set of features.
+#' @param x,y Fitted [ebm] objects that have been trained on similar data sets
+#' that have the same set of features.
 #'
 #' @param ... Additional [ebm] objects to be merged.
 #'
 #' @returns A merged [ebm] object.
+#'
+#' @note As of right now, the `merge()` function produces the following error
+#' message:
+#' ```
+#' Error in py_repr(x) :
+#'   AttributeError: 'ExplainableBoostingRegressor' object has no attribute 'cat_smooth'
+#' Run `reticulate::py_last_error()` for details.
+#' ```
+#' This seems to be a bug in the underlying
+#' [interpret](https://github.com/interpretml/interpret/)
+#' library and does not prevent this function from working. The error message is
+#' seemingly just a side effect.
 #'
 #' @export
 merge.EBM <- function(x, y, ...) {
@@ -23,8 +35,7 @@ merge.EBM <- function(x, y, ...) {
            domain = NA)
     }
     r <- c(r, xtr)
-    merged <- interpret$glassbox$merge_ebms(r)
-    class(merged) <- c("EBM", class(merged))
+    merged <- as.ebm(interpret$glassbox$merge_ebms(r))
     return(merged)
   }
 }

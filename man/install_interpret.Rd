@@ -17,11 +17,14 @@ install_interpret(
 
 \item{...}{Additional optional arguments. (Currently ignored.)}
 
-\item{extra_packages}{Additional Python packages to install alongside interpret.}
+\item{extra_packages}{Additional Python packages to install alongside
+interpret.}
 
-\item{python_version}{Passed on to \code{reticulate::virtualenv_starter()}}
+\item{python_version}{Passed on to
+\link[reticulate:virtualenv-tools]{virtualenv_starter()}.}
 
-\item{restart_session}{Whether to restart the R session after installing (note this will only occur within RStudio).}
+\item{restart_session}{Whether to restart the R session after installing
+(note this will only occur within RStudio).}
 }
 \value{
 No return value, called for side effects.
