@@ -6,7 +6,7 @@ author:
     address:
     - Department of Operations, Business Analytics, and Information Systems
     - Cincinnati, Ohio
-    url: https://www.britannica.com/animal/quokka
+    url: https://github.com/bgreenwell
     orcid: 0000-0002-8120-0084
     email: greenwb@ucmail.uc.edu
 abstract: >
