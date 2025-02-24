@@ -7,6 +7,14 @@
 \description{
 More about what it does (maybe more than one line). Continuation lines should be indented.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/bgreenwell/ebm}
+  \item \url{https://bgreenwell.github.io/ebm/}
+}
+
+}
 \author{
 \strong{Maintainer}: Brandon Greenwell \email{greenwell.brandon@gmail.com} (\href{https://orcid.org/0000-0002-8120-0084}{ORCID})
 

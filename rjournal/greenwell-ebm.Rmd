@@ -35,6 +35,22 @@ knitr::opts_chunk$set(
 )
 ```
 
+## WARNING
+
+This article is very much a work in progress and is subject to change!
+
+TODO:
+
+- [] Finish setup, EBM, and discussion sections
+- [] Clean up package references
+  * Make sure first call to each package if followed by a reference 
+  * Use \\CRANpkg if necessary in first reference to packages on CRAN
+- [] Clean up citations
+- [] Address all TODOs and FIXMEs throughout article
+- [] Check spelling
+- [] Proofread final draft
+
+
 ## Introduction
 
 Generalized linear models (GLMs) [@nelder-1972-glm] have been a bedrock of statistical modeling for over fifty years. GLMs extend the classic linear model to accommodate non-Gaussian response distributions, as well as some degree of non-linearity in the model structure. In particular, GLMs have three components:
@@ -58,12 +74,12 @@ Generalized additive models (GAMs) [@hastie-1990-gam] extend GLMs by replacing t
 \end{equation}
 The functions $f_j$ are general enough that they can absorb the intercept (hence, sometimes we may omit the bias term $\beta_0$ in \eqref{eqn:gam}). Model \eqref{eqn:gam} is quite flexible in how the response depends on the predictors. Further, GAMs maintain explainability since the model's output can be understood by simply plotting the individual term contributions (sometimes called shape functions) $f_j\left(x_j\right)$. GAMs can also include interactions effects. For example, a pairwise interaction effect between $x_i$ and $x_j$ can be accommodated by including a bivariate term of the form $f\left(x_i, x_j\right)$. The terms in a GAM can be represented by a variety of functions. Traditionally, the terms in a GAM are represented using some form of smoothing splines. For a thorough overview of GAMs, see @wood-2017-gam.
 
-@lou-2013-ga2m introduced generalized additive models plus interactions (GA^2^Ms) which automatically search for and include important pairwise interaction terms using an algorith called FAST^[As far as I can tell, FAST is not an acronym for anything in particular.]. The resulting model consists of univariate terms and a small number of pairwise interaction terms. Since GA^2^Ms are low-dimensional, they can still be visualized and interpreted by users while potentially being more accurate. A GA^2^M has the general form
+@lou-2013-ga2m introduced generalized additive models plus interactions (GA^2^Ms) which automatically search for and include important pairwise interaction terms using an algorithm called FAST^[As far as I can tell, FAST is not an acronym for anything in particular.]. The resulting model consists of univariate terms and a small number of pairwise interaction terms. Since GA^2^Ms are low-dimensional, they can still be visualized and interpreted by users while potentially being more accurate. A GA^2^M has the general form
 \begin{equation}
   g\left(E\left[Y|\boldsymbol{x}\right]\right) = \sum f_i\left(x_i\right) + \sum f_{ij}\left(x_i, x_j\right).
   \label{eqn:ga2m}
 \end{equation}
-Here we've simply abosrbed the bias term (or intercept) into the shape functions $f_i$. In contrast to tradition GAMs \eqref{eqn:gam}, the shape functions in \eqref{eqn:ga2m} are not necessarily smooth. In particular, modern GA^2^Ms often rely on tree-based methods and gradient boosting [@greenwell-2022-tree], which tend to produce more rigid step functions.
+Here we've simply absorbed the bias term (or intercept) into the shape functions $f_i$. In contrast to tradition GAMs \eqref{eqn:gam}, the shape functions in \eqref{eqn:ga2m} are not necessarily smooth. In particular, modern GA^2^Ms often rely on tree-based methods and gradient boosting [@greenwell-2022-tree], which tend to produce more rigid step functions.
 
 
 # Explainable boosting machines
@@ -113,11 +129,16 @@ In the next section, we'll discuss the \pkg{ebm} package in detail and provide s
 
 The \pkg{ebm} package is an R wrapper around the explainable boosting functionality of the \pkg{interpret} module in Python, powered by \CRANpkg{reticulate}. The main features of this package, especially when compared to the R package \pkg{interpret}, include:
 
-* Support for all the objective (i.e., loss) function provided by the Python modeule (e.g., Poisson devaince for modeling counts).
+* Support for all the objective (i.e., loss) function provided by the Python module (e.g., Poisson deviance for modeling counts).
 * Static and interactive graphics for explaining the model.
 * Global and local explanations for a fitted model.
 * Convenient generic function like `print()`, `plot()`, and `predict()`.
 * Support for loading in EBM models fit via the corresponding Python module.
+
+
+## Environment set up
+
+TODO: Briefly talk about setting up a Python environment, as well as the `install_interpret()` function.
 
 
 ## Predicting and explaining policy ownership (the CoIL 2000 challenge)
@@ -151,7 +172,7 @@ EBMs are random in nature due to random subsampling (used for early stopping dur
 Predictions can be obtained using the generic `predict()` method. The type of prediction is controlled via the `type` argument, which defaults to `type = "response"`. For classification, this results in a matrix of predicted probabilities. Other options useful options here are `type = "link"` (i.e., predictions on the logit scale) and `type = "class` for predicting class labels. Each of these are shown below for the test set:
 
 ```{r tic-ebm-predict}
-# Compute predictions on the probabilitt scale
+# Compute predictions on the probability scale
 head(probs <- predict(tic_ebm, newdata = tictst))
 
 # Compute predictions on the link (i.e., logit) scale
@@ -162,7 +183,7 @@ labels <- predict(tic_ebm, newdata = tictst, type = "class")
 table("Observed" = tictst$CARAVAN, "Predicted" = labels)
 ```
 
-The winning entry, by Charles Elkan [@elkan-2001-coil], correctly identified 121 caravan policy holders among its 800 top predictions for the test set. The EBM fitted above does exactly the same according to the cumulatice gains computed below:
+The winning entry, by Charles Elkan [@elkan-2001-coil], correctly identified 121 caravan policy holders among its 800 top predictions for the test set. The EBM fitted above does exactly the same according to the cumulative gains computed below:
 
 ```{r tic-ebm-cumulative-gains}
 ord <- order(probs[, 2L], decreasing = TRUE)
@@ -176,7 +197,7 @@ par(las = 1)
 rms::val.prob(probs[, 2L], y = tictst$CARAVAN, cex = 0.5)
 ```
 
-After training a model, it's often desirable to have a way to persist the model for future use without having to retrain it. In R, we can typically save the result of a model using `saveRDS()`. Alternatively, some packages provide a more native solution, like CRANpkg{xgboost}'s `xgb.save()` function. These solutions will not work here since the connection to the underlying Python object is lost once the session is finished. The proper way to handle this is to use \pkg{reticulate}'s `py_save_object()` and `py_load_object()` functions to save and load the underlying Python object. This works by serializing the fitted EBM object using Python's \pkg{pickle} module. Advanced \pkg{reticulate} users could also rely on rely on the \pkg{joblib} module or even exporting the fitted model to ONNX (Open Neural Network Exchange) via the \pkg{ebm2onnx} module, depending on the need. For more details on persisiting a fitted model in Python visit https://scikit-learn.org/stable/model_persistence.html. Here we'll show how to persist a fitted EBM model using both \pkg{pickle} (through \pkg{reticulate}'s built-in functions mentioned above), as well as \pkg{joblib}.
+After training a model, it's often desirable to have a way to persist the model for future use without having to retrain it. In R, we can typically save the result of a model using `saveRDS()`. Alternatively, some packages provide a more native solution, like \CRANpkg{xgboost}'s `xgb.save()` function. These solutions will not work here since the connection to the underlying Python object is lost once the session is finished. The proper way to handle this is to use \pkg{reticulate}'s `py_save_object()` and `py_load_object()` functions to save and load the underlying Python object. This works by serializing the fitted EBM object using Python's \pkg{pickle} module. Advanced \pkg{reticulate} users could also rely on rely on the \pkg{joblib} module or even exporting the fitted model to ONNX (Open Neural Network Exchange) via the \pkg{ebm2onnx} module, depending on the need. For more details on persisting a fitted model in Python visit https://scikit-learn.org/stable/model_persistence.html. Here we'll show how to persist a fitted EBM model using both \pkg{pickle} (through \pkg{reticulate}'s built-in functions mentioned above), as well as \pkg{joblib}.
 
 Note that a serialized `"EBM"` object get stripped of the `"EBM"` class which is used for calling various methods, like `plot()`, which we'll discuss later. To overcome that issues, we provide an `as.ebm()` function for adding on the appropriate class. This of course also means that you can import EBM models fitted with the Python \pkg{interpret} module into R for use with `print()`, `plot()`, etc.
 
@@ -219,7 +240,7 @@ plot(tic_ebm, n_terms = 15)
 
 The default behavior is to produce a dotchart, but you can switch to a bar plot by setting `geom = "col"` in the call to `plot()`. Setting `horizontal = TRUE` will also produce a plot that's been flipped on its axes. See `?ebm::plot.EBM` for details.
 
-Next, we'll plot the main effect for `PPERSAUT`, the highest rated term in the model, by setting `term = "PPERSAUT"` in the call to `plot()`; note that this is just a plot of shape function $f\left(\mathtt{PPERSAUT}\right)$ from \eqref{eqn:ebm}. It's good practice to include some information regarding the distribution of ther variable of interest to help avoid extrapolation and over interpreting such plots.
+Next, we'll plot the main effect for `PPERSAUT`, the highest rated term in the model, by setting `term = "PPERSAUT"` in the call to `plot()`; note that this is just a plot of shape function $f\left(\mathtt{PPERSAUT}\right)$ from \eqref{eqn:ebm}. It's good practice to include some information regarding the distribution of the variable of interest to help avoid extrapolation and over interpreting such plots.
 
 ```{r tic-ebm-term-PPERSAUT, fig.cap="Main effect of $\\mathtt{PPERSAUT}$."}
 plot(tic_ebm, "PPERSAUT", horizontal = TRUE) +  # main effect plot
@@ -241,7 +262,7 @@ plot(tic_ebm, term = "PPERSAUT", interactive = TRUE)
 knitr::include_graphics("images/screenshot.png")
 ```
 
-Let's look at the second most important term, `APERSAUT`, which corresponds to a continuous feature representing the number of car policies owned. The main effect for `APERSAUT` is displayed in the left side of Figure \ref{fig:tic-ebm-term-APERSAUT}. We might expect there to be an increasing monotonic relationship between `APERSAUT` and the log odds of buying a mobile home policy. In fact, it's often desirable that the shape functions $f_j\left(x_j\right)$ in \eqref{eqn:ebm} be constrained in some way. This may be due to business considerations, or because of some a priori belief about the underlying relationships between the predictors and the response. In such cases, we may wish to enforce a type of constraint called monotonicity on some of the terms in the model. This means, for example, that the relationship between $x_j$ and $y$, as modeled through $f_j\left(x_j\right)$ should always be increasing or decreasing. For instance, a monotonic increasing relatiobnship would ensure that $f_j\left(x_j\right) \ge f_j\left(x_j'\right)$ whenever $x_j \ge x_j'$ (and vice versa for a decreasing monotonic relationship).
+Let's look at the second most important term, `APERSAUT`, which corresponds to a continuous feature representing the number of car policies owned. The main effect for `APERSAUT` is displayed in the left side of Figure \ref{fig:tic-ebm-term-APERSAUT}. We might expect there to be an increasing monotonic relationship between `APERSAUT` and the log odds of buying a mobile home policy. In fact, it's often desirable that the shape functions $f_j\left(x_j\right)$ in \eqref{eqn:ebm} be constrained in some way. This may be due to business considerations, or because of some a priori belief about the underlying relationships between the predictors and the response. In such cases, we may wish to enforce a type of constraint called monotonicity on some of the terms in the model. This means, for example, that the relationship between $x_j$ and $y$, as modeled through $f_j\left(x_j\right)$ should always be increasing or decreasing. For instance, a monotonic increasing relationship would ensure that $f_j\left(x_j\right) \ge f_j\left(x_j'\right)$ whenever $x_j \ge x_j'$ (and vice versa for a decreasing monotonic relationship).
 
 To illustrate the idea, we'll enforce a decreasing monotonic relationship between `APERSAUT` and the log odds of purchasing a mobile policy (`CARAVAN`). While we can enforce monotonic constraints via the `monotone_constraints` argument in the call to `ebm()`, the \pkg{interpret} authors generally recommend forcing monotonicity by post-processing the graphs of the fitted model instead using isotonic regression. This is the recommended approach as it prevents the model from compensating for the monotonicity constraints by learning non-monotonic effects in other highly-correlated features. We can follow this route by calling the `$monotonize()` method that's bound to the fitted `"EBM"` object. Note that calling this method will modify the original object in place, so to preserve the original object, we'll also call the `$copy()` bound method to make a deep copy. Additionally, we lose any uncertainty associated with the term from the outer bagging in the original model.
 
@@ -287,7 +308,7 @@ From Figure \ref{fig:tic-ebm-local} we can see that the biggest drivers for a lo
 
 ## Predicting ALS progression (the DREAM challenge prediction prize)
 
-In this section, we'll look at a brief example using the ALS data from Efron and Hastie (2016, 349). A description of the data, along with the original source and download instructions, can be found at \url{https://hastie.su.domains/CASI/data.html}.
+In this section, we'll look at a brief example using the ALS data from \citet[p. 349]{efron-2016-casi}. A description of the data, along with the original source and download instructions, can be found at \url{https://hastie.su.domains/CASI/data.html}.
 
 These data concern 1822 observations on *amyotrophic lateral sclerosis* (ALS or Lou Gehrig's disease) patients. The goal is to predict ALS progression over time, as measured by the slope (or derivative) of a functional rating score (i.e., column `dFRS`), using 369 available predictors obtained from patient visits. The data were originally part of the DREAM-Phil Bowen ALS Predictions Prize4Life challenge. The winning solution [@kuffner-2015-als] used a Bayesian tree ensemble quite similar to a random forest, while \cite[chap. 17]{efron-2016-casi} analyzed the data using gradient tree boosting via the R package \CRANpkg{gbm} [@R-gbm].
 
@@ -450,18 +471,18 @@ plot(ebm2, term = "temp") + plot(ebm3, term = "temp")
 
 Recommended tuning strategies for EBMs are discussed in the \pkg{interpret} module's FAQ: https://interpret.ml/docs/faq.html. We outline the essential points here. Similar to random forests, the default hyperparameters for EBMs tend to perform reasonably well on most problems; hence, we stuck with the default for the examples in this paper. A reasonable strategy is to train an initial model using the defaults and looking through the learned functions to catch unexpected or abnormal behavior---oftentimes, these graphs can help indicate which parameters should be tuned. Here are some general recommendations from the \pkg{interpret} module developers:
 
-* For accuracy, it's generally recommend to set `outer_bags` and `inner_bags` to 25 or more each. This will significantly slow down the training time of the algorithm, and may be infeasible on larger data sets, but tends to produce smoother graphs with marginally higher accuracy. Note that the algorithm is parallelized at the outer bags level, so typically you'll pay a steeper price in terms of computing time for larger values of the inner bags parameter.
+* For accuracy, it's generally recommend to set `outer_bags` and `inner_bags` to 25 or more each. This will significantly slow down the training time of the algorithm, and may be unfeasible on larger data sets, but tends to produce smoother graphs with marginally higher accuracy. Note that the algorithm is parallelized at the outer bags level, so typically you'll pay a steeper price in terms of computing time for larger values of the inner bags parameter.
 
 * If you believe your model might be overfitting (e.g., large difference between train and test error, or high degrees of instability in the graphs), consider reducing `max_bins` for smaller data sets (to clump more data together) and take a more aggressive approach to early stopping by decreasing `early_stopping_rounds` and increasing `early_stopping_tolerance`. Conversely, if you believe your model is underfitting, you can do the opposite of the previous suggestions (it might also be helpful to increase `max_rounds`).
 
-* If several pairwise interaction effects seem realtively important (i.e., are appearing higher up on the term importance list/plot), then try increasing the maximum number of allowed interactions via the `interaction` argument.
+* If several pairwise interaction effects seem relatively important (i.e., are appearing higher up on the term importance list/plot), then try increasing the maximum number of allowed interactions via the `interaction` argument.
 
-* For general tuning, it's recommended to sweep through `max_bins` with values in the range 32--1024, and `max_leaves` from 2--5. The potentialy improvements are typically marginal, but may help significantly on some data sets.
+* For general tuning, it's recommended to sweep through `max_bins` with values in the range 32--1024, and `max_leaves` from 2--5. The potential improvements are typically marginal, but may help significantly on some data sets.
 
 Detailed discussion on each hyperparameter available for tuning can be found here: https://interpret.ml/docs/hyperparameters.html.
 
 
 # Discussion
 
-We gave a brief introduction to EBMs and a detailed walkthrough of the new R interface provided by the \pkg{ebm} package.
+We gave a brief introduction to EBMs and a detailed walk through of the new R interface provided by the \pkg{ebm} package.
 

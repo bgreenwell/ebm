@@ -17,6 +17,7 @@ Suggests:
     knitr,
     rmarkdown,
     rstudioapi
+URL: https://github.com/bgreenwell/ebm, https://bgreenwell.github.io/ebm/
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

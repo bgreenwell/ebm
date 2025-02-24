@@ -8,6 +8,37 @@
 An abstract of less than 150 words.
 }
 
+\subsection{WARNING}\label{warning}
+
+This article is very much a work in progress and is subject to change!
+
+TODO:
+
+\begin{itemize}
+\tightlist
+\item
+  {[}{]} Finish setup, EBM, and discussion sections
+\item
+  {[}{]} Clean up package references
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Make sure first call to each package if followed by a reference
+  \item
+    Use \textbackslash CRANpkg if necessary in first reference to
+    packages on CRAN
+  \end{itemize}
+\item
+  {[}{]} Clean up citations
+\item
+  {[}{]} Address all TODOs and FIXMEs throughout article
+\item
+  {[}{]} Check spelling
+\item
+  {[}{]} Proofread final draft
+\end{itemize}
+
 \subsection{Introduction}\label{introduction}
 
 Generalized linear models (GLMs) \citep{nelder-1972-glm} have been a
@@ -71,7 +102,7 @@ see \citet{wood-2017-gam}.
 
 \citet{lou-2013-ga2m} introduced generalized additive models plus
 interactions (GA\textsuperscript{2}Ms) which automatically search for
-and include important pairwise interaction terms using an algorith
+and include important pairwise interaction terms using an algorithm
 called FAST\footnote{As far as I can tell, FAST is not an acronym for
   anything in particular.}. The resulting model consists of univariate
 terms and a small number of pairwise interaction terms. Since
@@ -80,7 +111,7 @@ visualized and interpreted by users while potentially being more
 accurate. A GA\textsuperscript{2}M has the general form \begin{equation}
   g\left(E\left[Y|\boldsymbol{x}\right]\right) = \sum f_i\left(x_i\right) + \sum f_{ij}\left(x_i, x_j\right).
   \label{eqn:ga2m}
-\end{equation} Here we've simply abosrbed the bias term (or intercept)
+\end{equation} Here we've simply absorbed the bias term (or intercept)
 into the shape functions \(f_i\). In contrast to tradition GAMs
 \eqref{eqn:gam}, the shape functions in \eqref{eqn:ga2m} are not
 necessarily smooth. In particular, modern GA\textsuperscript{2}Ms often
@@ -210,7 +241,7 @@ compared to the R package \pkg{interpret}, include:
 \tightlist
 \item
   Support for all the objective (i.e., loss) function provided by the
-  Python modeule (e.g., Poisson devaince for modeling counts).
+  Python module (e.g., Poisson deviance for modeling counts).
 \item
   Static and interactive graphics for explaining the model.
 \item
@@ -222,6 +253,11 @@ compared to the R package \pkg{interpret}, include:
   Support for loading in EBM models fit via the corresponding Python
   module.
 \end{itemize}
+
+\subsection{Environment set up}\label{environment-set-up}
+
+TODO: Briefly talk about setting up a Python environment, as well as the
+\texttt{install\_interpret()} function.
 
 \subsection{Predicting and explaining policy ownership (the CoIL 2000
 challenge)}\label{predicting-and-explaining-policy-ownership-the-coil-2000-challenge}
@@ -315,7 +351,7 @@ Each of these are shown below for the test set:
 
 \begin{Schunk}
 \begin{Sinput}
-# Compute predictions on the probabilitt scale
+# Compute predictions on the probability scale
 head(probs <- predict(tic_ebm, newdata = tictst))
 \end{Sinput}
 \begin{Soutput}
@@ -350,7 +386,7 @@ table("Observed" = tictst$CARAVAN, "Predicted" = labels)
 The winning entry, by Charles Elkan \citep{elkan-2001-coil}, correctly
 identified 121 caravan policy holders among its 800 top predictions for
 the test set. The EBM fitted above does exactly the same according to
-the cumulatice gains computed below:
+the cumulative gains computed below:
 
 \begin{Schunk}
 \begin{Sinput}
@@ -398,7 +434,7 @@ After training a model, it's often desirable to have a way to persist
 the model for future use without having to retrain it. In R, we can
 typically save the result of a model using \texttt{saveRDS()}.
 Alternatively, some packages provide a more native solution, like
-CRANpkg\{xgboost\}'s \texttt{xgb.save()} function. These solutions will
+\CRANpkg{xgboost}'s \texttt{xgb.save()} function. These solutions will
 not work here since the connection to the underlying Python object is
 lost once the session is finished. The proper way to handle this is to
 use \pkg{reticulate}'s \texttt{py\_save\_object()} and
@@ -407,7 +443,7 @@ Python object. This works by serializing the fitted EBM object using
 Python's \pkg{pickle} module. Advanced \pkg{reticulate} users could also
 rely on rely on the \pkg{joblib} module or even exporting the fitted
 model to ONNX (Open Neural Network Exchange) via the \pkg{ebm2onnx}
-module, depending on the need. For more details on persisiting a fitted
+module, depending on the need. For more details on persisting a fitted
 model in Python visit
 \url{https://scikit-learn.org/stable/model_persistence.html}. Here we'll
 show how to persist a fitted EBM model using both \pkg{pickle} (through
@@ -554,7 +590,7 @@ Next, we'll plot the main effect for \texttt{PPERSAUT}, the highest
 rated term in the model, by setting \texttt{term\ =\ "PPERSAUT"} in the
 call to \texttt{plot()}; note that this is just a plot of shape function
 \(f\left(\mathtt{PPERSAUT}\right)\) from \eqref{eqn:ebm}. It's good
-practice to include some information regarding the distribution of ther
+practice to include some information regarding the distribution of the
 variable of interest to help avoid extrapolation and over interpreting
 such plots.
 
@@ -634,7 +670,7 @@ response. In such cases, we may wish to enforce a type of constraint
 called monotonicity on some of the terms in the model. This means, for
 example, that the relationship between \(x_j\) and \(y\), as modeled
 through \(f_j\left(x_j\right)\) should always be increasing or
-decreasing. For instance, a monotonic increasing relatiobnship would
+decreasing. For instance, a monotonic increasing relationship would
 ensure that \(f_j\left(x_j\right) \ge f_j\left(x_j'\right)\) whenever
 \(x_j \ge x_j'\) (and vice versa for a decreasing monotonic
 relationship).
@@ -793,8 +829,8 @@ or make any contribution toward existing car policies.
 prize)}\label{predicting-als-progression-the-dream-challenge-prediction-prize}
 
 In this section, we'll look at a brief example using the ALS data from
-Efron and Hastie (2016, 349). A description of the data, along with the
-original source and download instructions, can be found at
+\citet[p. 349]{efron-2016-casi}. A description of the data, along with
+the original source and download instructions, can be found at
 \url{https://hastie.su.domains/CASI/data.html}.
 
 These data concern 1822 observations on \emph{amyotrophic lateral
@@ -907,8 +943,8 @@ scoring time. For methodological (and software) details, see
 \citet{greenwell-2023-explainable}.
 
 We'll illustrate the basic idea using the previous model, which contains
-703 total terms comprised of the main effects, pairwise interactions,
-and an intercept.
+1 total terms comprised of the main effects, pairwise interactions, and
+an intercept.
 
 In the next chunk, we'll construct data matrices consisting of the
 individual term contributions for both the train and test sets. For
@@ -1108,7 +1144,7 @@ system.time({
 \end{Sinput}
 \begin{Soutput}
 #>    user  system elapsed 
-#>   0.052   0.009   7.487
+#>   0.052   0.007   7.473
 \end{Soutput}
 \begin{Sinput}
 # Use one CPU
@@ -1119,7 +1155,7 @@ system.time({
 \end{Sinput}
 \begin{Soutput}
 #>    user  system elapsed 
-#>  46.094   0.547  46.809
+#>  46.068   0.580  46.693
 \end{Soutput}
 \begin{Sinput}
 # Use all CPUs, but no bagging
@@ -1130,7 +1166,7 @@ system.time({
 \end{Sinput}
 \begin{Soutput}
 #>    user  system elapsed 
-#>   0.024   0.001   1.112
+#>   0.024   0.002   1.150
 \end{Soutput}
 \begin{Sinput}
 # Plot results (Figure XYZ)
@@ -1163,7 +1199,7 @@ the \pkg{interpret} module developers:
 \item
   For accuracy, it's generally recommend to set \texttt{outer\_bags} and
   \texttt{inner\_bags} to 25 or more each. This will significantly slow
-  down the training time of the algorithm, and may be infeasible on
+  down the training time of the algorithm, and may be unfeasible on
   larger data sets, but tends to produce smoother graphs with marginally
   higher accuracy. Note that the algorithm is parallelized at the outer
   bags level, so typically you'll pay a steeper price in terms of
@@ -1179,14 +1215,14 @@ the \pkg{interpret} module developers:
   previous suggestions (it might also be helpful to increase
   \texttt{max\_rounds}).
 \item
-  If several pairwise interaction effects seem realtively important
+  If several pairwise interaction effects seem relatively important
   (i.e., are appearing higher up on the term importance list/plot), then
   try increasing the maximum number of allowed interactions via the
   \texttt{interaction} argument.
 \item
   For general tuning, it's recommended to sweep through
   \texttt{max\_bins} with values in the range 32--1024, and
-  \texttt{max\_leaves} from 2--5. The potentialy improvements are
+  \texttt{max\_leaves} from 2--5. The potential improvements are
   typically marginal, but may help significantly on some data sets.
 \end{itemize}
 
@@ -1195,7 +1231,7 @@ found here: \url{https://interpret.ml/docs/hyperparameters.html}.
 
 \section{Discussion}\label{discussion}
 
-We gave a brief introduction to EBMs and a detailed walkthrough of the
+We gave a brief introduction to EBMs and a detailed walk through of the
 new R interface provided by the \pkg{ebm} package.
 
 \bibliography{greenwell-ebm.bib}
@@ -1206,7 +1242,7 @@ University of Cincinnati\\%
 Department of Operations, Business Analytics, and Information
 Systems\\ Cincinnati, Ohio\\
 %
-\url{https://www.britannica.com/animal/quokka}\\%
+\url{https://github.com/bgreenwell}\\%
 \textit{ORCiD: \href{https://orcid.org/0000-0002-8120-0084}{0000-0002-8120-0084}}\\%
 \href{mailto:greenwb@ucmail.uc.edu}{\nolinkurl{greenwb@ucmail.uc.edu}}%
 }

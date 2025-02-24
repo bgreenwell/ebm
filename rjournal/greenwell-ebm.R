@@ -30,7 +30,7 @@ library(ebm)
 
 
 ## ----tic-ebm-predict----------------------------------------------------------
-# Compute predictions on the probabilitt scale
+# Compute predictions on the probability scale
 head(probs <- predict(tic_ebm, newdata = tictst))
 
 # Compute predictions on the link (i.e., logit) scale
