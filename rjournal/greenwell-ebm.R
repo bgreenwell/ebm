@@ -15,6 +15,36 @@ knitr::opts_chunk$set(
 )
 
 
+## ----reticulate-help, eval=FALSE----------------------------------------------
+#> vignette("versions", package = "reticulate")  # Python version configuration
+#> vignette("python_packages", package = "reticulate")  # mangaing envs and modules
+
+
+## ----ebm-setup, eval=FALSE----------------------------------------------------
+#> library(reticulate)
+#> 
+#> # Create a new environment
+#> virtualenv_create("r-ebm")
+#> 
+#> # Install the interpret module
+#> virtualenv_install("r-ebm-abc", packages = "interpret")
+#> # Can also call `ebm::install_interet("r-ebm")`
+#> 
+#> # Switch to the created virtual environment, if not already there
+#> # use_virtualenv("r-ebm", required = TRUE)
+#> 
+#> # Load the interpret.glassbox sub-package
+#> interpret <- import("interpret")
+#> print(interpret$`__version__`)
+#> names(interpret$glassbox)
+
+
+## ----ebm-setup-print, echo=FALSE----------------------------------------------
+interpret <- reticulate::import("interpret")
+print(interpret$`__version__`)  # current version of interpret library
+names(interpret$glassbox)
+
+
 ## ----tic----------------------------------------------------------------------
 data("ticdata", package = "kernlab")
 ticdata$CARAVAN <- ifelse(ticdata$CARAVAN == "insurance", 1L, 0L)
@@ -48,7 +78,7 @@ sum(tictst$CARAVAN[ord[1:800]])  # number of 1s if we sort by highest prob
 
 ## ----tic-ebm-calibration, fig.cap="Calibration curve and validation statistics based on the the test set."----
 par(las = 1)
-rms::val.prob(probs[, 2L], y = tictst$CARAVAN, cex = 0.5)
+rms::val.prob(probs[, 2L], y = tictst$CARAVAN, cex = 0.5)  # See Figure XYZ
 
 
 ## ----tic-ebm-pickle-----------------------------------------------------------
@@ -76,12 +106,12 @@ library(patchwork)
 
 theme_set(theme_bw())  # my preferred theme for ggplot2
 
-# Plot feature importance
+# Plot feature importance (see Figure XYZ)
 plot(tic_ebm, n_terms = 15)  
 
 
 ## ----tic-ebm-term-PPERSAUT, fig.cap="Main effect of $\\mathtt{PPERSAUT}$."----
-plot(tic_ebm, "PPERSAUT", horizontal = TRUE) +  # main effect plot
+plot(tic_ebm, "PPERSAUT", horizontal = TRUE) +  # See Figure XYZ
   ggplot(tictrn, aes(PPERSAUT)) +  # add distribution plot
   geom_bar() + 
   scale_x_discrete(drop = FALSE) +  # don't drop zero counts 
@@ -100,7 +130,7 @@ knitr::include_graphics("images/screenshot.png")
 tic_ebm_mono <- as.ebm(tic_ebm$copy())  # make a deep copy to leave original intact
 tic_ebm_mono$monotonize("APERSAUT", increasing = FALSE)
 
-# Display results side by side
+# Display results side by side (see Figure XYZ)
 plot(tic_ebm, term = "APERSAUT") + ggtitle("Original") +
   plot(tic_ebm_mono, term = "APERSAUT") + ggtitle("Monotonized")
 
@@ -119,10 +149,10 @@ plt <- tic_ebm$explain_global()$visualize(idx)
 plt$to_ordered_dict()$data[[1L]]
 
 
-## ----tic-ebm-local, fig.cap="ABC..."------------------------------------------
+## ----tic-ebm-local, fig.cap="ABC."--------------------------------------------
 newx <- subset(tictst[1L, ], select = -CARAVAN)
 newy <- tictst$CARAVAN[1L]  # not useful unless `interactive = TRUE`
-plot(tic_ebm, local = TRUE, X = newx, y = newy)
+plot(tic_ebm, local = TRUE, X = newx, y = newy)  # See Figure XYZ
 
 
 ## ----als----------------------------------------------------------------------
@@ -141,11 +171,11 @@ pred <- predict(als_ebm, newdata = alstst)
 
 
 ## ----als-ebm-importance, fig.cap="ABC."---------------------------------------
-plot(als_ebm, n_terms = 10)  # Figure XYZ
+plot(als_ebm, n_terms = 10)  # See Figure XYZ
 
 
 ## ----als-ebm-pairwise-interaction, fig.cap="ABC."-----------------------------
-plot(als_ebm, term = c("Onset.Delta", "last.slope.weight"))
+plot(als_ebm, term = c("Onset.Delta", "last.slope.weight"))  # See Figure XYZ
 
 
 ## ----als-ebm-term-matrices----------------------------------------------------
@@ -181,7 +211,8 @@ lambda <- res[which.min(res$mse), "lambda"]
 res[which.min(res$mse), ]
 
 
-## ----als-ebm-lassso-plot------------------------------------------------------
+## ----als-ebm-lassso-plot, fig.cap="ABC."--------------------------------------
+# Plot results (see Figure 7)
 par(mfrow = c(1, 2), mar = c(4, 4, 0.1, 0.1), cex.lab = 0.95, 
     cex.axis = 0.8, mgp = c(2, 0.7, 0), tcl = -0.3, las = 1)
 plot(lasso, xvar = "lambda", col = adjustcolor("darkred", alpha.f = 0.3),
@@ -192,7 +223,7 @@ plot(res[, c("n_terms", "mse")], type = "l", las = 1,
 abline(h = mse_tst, lty = 2, col = "darkred")
 
 
-## ----als-ebm-lasso-scale------------------------------------------------------
+## ----als-ebm-lasso-scale, fig.cap="ABC."--------------------------------------
 als_ebm_lasso <- as.ebm(als_ebm$copy())
 weights <- coef(lasso, s = lambda)  # LASSO coefficients (most are zero!)
 weights <- setNames(as.numeric(weights), nm = rownames(weights))
@@ -205,18 +236,18 @@ als_ebm_lasso$intercept_ <- weights[1L]
 # Remove unused terms!
 als_ebm_lasso$sweep(terms = TRUE, bins = TRUE, features = FALSE)
 length(als_ebm_lasso$term_names_)
-plot(als_ebm_lasso)  # show new feature importance scores
+plot(als_ebm_lasso)  # show new term importance scores (see Figure 8)
 
 
 ## ----als-ebm-lasso-sanity-----------------------------------------------------
 # Compare predictions between LASSO and compressed EBM (should be the same!)
 head(cbind(
-  "EBM (LASSO)" = predict(als_ebm_lasso, newdata = alstst),
-  "LASSO" = predict(lasso, newx = X_tst, s = lambda, type = "response"))
+  "EBM (Compressed)" = predict(als_ebm_lasso, newdata = alstst),
+  "LASSO" = unname(predict(lasso, newx = X_tst, s = lambda, type = "response")))
 )
 
 
-## ----bikeshare-parallel, fig.cap="ABC. Left: ABC. Right: ABC."----------------
+## ----ebm-parallelism, fig.cap="ABC. Left: ABC. Right: ABC."-------------------
 keep <- c("workingday", "temp", "weathersit", "mnth", "hr", "bikers") 
 bikeshare <- ISLR2::Bikeshare[, keep]
 
@@ -238,6 +269,20 @@ system.time({
               inner_bags = 0, outer_bags = 1, n_jobs = -1)
 })
 
-# Plot results (Figure XYZ)
+# Plot results (see Figure 9)
 plot(ebm2, term = "temp") + plot(ebm3, term = "temp") 
+
+
+## ----ebm-merging, fig.cap="ABC."----------------------------------------------
+# Generate list of EBMs with different random seeds
+ebms <- lapply(1:3, FUN = function(i) {
+  ebm(mpg ~ ., data = mtcars, outer_bags = 1, random_state = i, obj = "rmse")
+})
+
+# Merge EBMs into one
+merged <- do.call(merge, args = ebms)
+
+# Display plots for "cyl" term in 2x2 grid (see Figure 10)
+cyl_plots <- lapply(c(ebms, merged), FUN = plot, term = "cyl")
+gridExtra::grid.arrange(grobs = cyl_plots, nrow = 2)
 

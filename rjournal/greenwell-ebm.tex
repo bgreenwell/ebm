@@ -8,37 +8,6 @@
 An abstract of less than 150 words.
 }
 
-\subsection{WARNING}\label{warning}
-
-This article is very much a work in progress and is subject to change!
-
-TODO:
-
-\begin{itemize}
-\tightlist
-\item
-  {[}{]} Finish setup, EBM, and discussion sections
-\item
-  {[}{]} Clean up package references
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Make sure first call to each package if followed by a reference
-  \item
-    Use \textbackslash CRANpkg if necessary in first reference to
-    packages on CRAN
-  \end{itemize}
-\item
-  {[}{]} Clean up citations
-\item
-  {[}{]} Address all TODOs and FIXMEs throughout article
-\item
-  {[}{]} Check spelling
-\item
-  {[}{]} Proofread final draft
-\end{itemize}
-
 \subsection{Introduction}\label{introduction}
 
 Generalized linear models (GLMs) \citep{nelder-1972-glm} have been a
@@ -104,7 +73,9 @@ see \citet{wood-2017-gam}.
 interactions (GA\textsuperscript{2}Ms) which automatically search for
 and include important pairwise interaction terms using an algorithm
 called FAST\footnote{As far as I can tell, FAST is not an acronym for
-  anything in particular.}. The resulting model consists of univariate
+  anything in particular.}. In short, FAST is a novel, computationally
+efficient method for ranking all possible pairs of feature candidates
+for inclusion in the model. The resulting model consists of univariate
 terms and a small number of pairwise interaction terms. Since
 GA\textsuperscript{2}Ms are low-dimensional, they can still be
 visualized and interpreted by users while potentially being more
@@ -124,16 +95,16 @@ machines}\label{explainable-boosting-machines}
 
 Explainable boosting machines \citep{nori-2019-interpret}, or EBMs for
 short, are a modern class of GA\textsuperscript{2}Ms, that can offer
-both competitive accuracy and explicit transparency and explainability,
-which are often considered to be two opposing goals of a machine
-learning (ML) model. For example, full-complexity models, like random
-forests \citep{breiman-2001-rf}, tend to be highly competitive in terms
-of accuracy, but are readily less transparent and explainable (due in
-part to the high-order interaction effects often captured by such
+both competitive accuracy and explicit transparency and exact
+explainability, which are often considered to be two opposing goals of a
+machine learning (ML) model. For example, full-complexity models, like
+random forests \citep{breiman-2001-rf}, tend to be highly competitive in
+terms of accuracy, but are readily less transparent and explainable (due
+in part to the high-order interaction effects often captured by such
 black-box models). Essentially, with EBMs, it's possible to ``have your
 cake and eat it too.'\,'
 
-In short, EBM models have the general form
+In short, EBMs have the general form
 
 \begin{equation}
 g\left(E\left[y\right]\right) = \theta_0 + \sum f_i\left(x_i\right) + \sum f_{ij}\left(x_i, x_j\right),
@@ -148,8 +119,8 @@ where
 \item
   \(g\) is a \emph{link function} that allows the model to handle
   various response types (e.g., the \emph{logit} link for logistic
-  regression or the identify function for ordinary regression with
-  continuous outcomes);
+  regression, the identify function for ordinary regression with
+  continuous outcomes, or Poisson deviance for modeling counts);
 \item
   \(\theta_0\) is a constant intercept (or bias term);
 \item
@@ -161,80 +132,64 @@ where
   interaction effect of \(x_i\) and \(x_j\)).
 \end{itemize}
 
-Similar to \emph{generalized additive models plus interactions} (Lou et
-al.~2013), or GA\textsuperscript{2}Ms for short, the pairwise
-interaction terms are determined automatically using the FAST algorithm
-described in Lou et al.~(2013). In short, FAST is a novel,
-computationally efficient method for ranking all possible pairs of
-feature candidates for inclusion into the model (by default, the top 10
-pairwise interactions are used). The primary difference between EBMs and
+Similar to GA\textsuperscript{2}Ms, the pairwise interaction terms are
+determined automatically using the FAST algorithm described in
+\citet{lou-2013-ga2m}. The primary difference between EBMs and
 GA\textsuperscript{2}Ms is in how the shape functions are estimated. In
-particular, EBMs use \emph{cyclic gradient boosting} (Nori et al.~2019;
-Wick, Kerzel, and Feindt 2020) to estimate the shape functions for each
-feature (and selected pairs of interactions) in a round-robin fashion
-using a low learning rate to help ensure that the order in which the
-feature effects are estimated does not matter. Estimating each feature
-one-at-a-time in a round-robin fashion also helps mitigate potential
-issues with \emph{collinearity} between predictors (Nori et al.~2019;
-Wick, Kerzel, and Feindt 2020).
+particular, EBMs use \emph{cyclic gradient boosting}
+\citep{nori-2019-interpret, wick-2019-cyclic} to estimate the shape
+functions for each feature (and selected pairs of interactions) in a
+round-robin fashion using a low learning rate to help ensure that the
+order in which the feature effects are estimated does not matter.
+Apparently, estimating each feature one-at-a-time in a round-robin
+fashion also helps mitigate potential issues with
+\emph{multicollinearity}.
 
-TODO: Move the following sections to later and modify. Also, talk about
-model editing and how EBMs are editable. Maybe a GAM-CHANGER example if
-there's room?!
-
-However, in contrast to the more common gradient boosting machine (J. H.
-Friedman 2001, 2002), or GBM for short, which can ignore irrelevant
-inputs, EBMs include at least one term in the model for each feature:
-one main effect (\(f_i\)) for each predictor, and a term for each
-selected pairwise interaction effect. This is due to the cyclic nature
-of the underlying boosting framework. For example, an EBM applied to a
-training set with \(p = 300\) features will result in a model with at
-least 300 terms.
+However, in contrast to the more common gradient boosting machine
+\citep{friedman-2001-greedy, friedman-2002-stochastic}, or GBM for
+short, which can ignore irrelevant inputs, EBMs include at least one
+term in the model for each feature: one main effect (\(f_i\)) for each
+predictor, and a term for each pairwise interaction effect selected
+using the FAST algorithm. This is due to the cyclic nature of the
+underlying boosting framework. For example, an EBM applied to a training
+set with \(p = 300\) features will result in a model with at least 300
+terms, sometimes substantially more!
 
 While EBMs are considered \emph{glass-box} models, an EBM with, say,
 hundreds or thousands of terms, starts to become much less transparent
 and explainable. Moreover, the larger the fitted model (i.e., the more
 terms there are), then the more time it will take the EBM to make
 predictions, making larger models less fit for deployment and
-production.
-
-To this end, we also propose in Section XYZ a way to introduce sparsity
-into a fitted EBM by rescaling the individual terms (i.e., the \(f_i\)
-and \(f_{ij}\)) via regression coefficients estimated from a method
-called the LASSO (Tibshirani 1996). Consequently, by nature of the
-\(L_1\) regularization enforced by the LASSO, many of these coefficients
-can be estimated to be zero, resulting in a reduced EBM with far fewer
-terms (and hopefully, comparable accuracy)!
+production. To this end, \citet{greenwell-2023-explainable} proposed a
+simple solution, which is illustrated via an example in a later section.
 
 \subsection{Software}\label{software}
 
-EBMs are implemented as part of the \textbf{InterpretML} framework
-\citep{nori-2019-interpret}, which includes both a Python and R
-interface called \textbf{interpret}. While the Python implementation is
+EBMs are implemented as part of the \pkg{InterpretML} framework
+\citep{nori-2019-interpret}, which includes both a Python and an R
+interface called \pkg{interpret}. While the Python implementation is
 fully functional and rich with features (e.g., interactive graphics),
 the R version \citep{R-interpret} currently lags behind. For instance,
-the R interface only supports classification settings and limited
-options (e.g., monotonic constraints are not currently supported).
-
-Further, the plotting functionality of the R \pkg{interpret} package
+the R interface does not currently support regression settings,
+monotonic constraints, or local explanations. Further, the plotting
+functionality of the \CRANpkg{interpret} R package \citep{R-interpret}
 only supports visualizing a single feature using static plots (i.e., no
 interactive visualizations, no visualizations for pairwise interactions,
 feature importance plots, or support for visualizing local
 explanations). Because of these serious drawbacks, we've developed the
-\CRANpkg{ebm} package, which is a full-featured R interface to the
-Python \pkg{interpret} library powered by \CRANpkg{reticulate}
-\citep{R-reticulate}.
-
-In the next section, we'll discuss the \pkg{ebm} package in detail and
-provide several examples that cannot be replicated through use of the
-official \pkg{interpret} package in R.
+\CRANpkg{ebm} package \citep{R-ebm}, which is a full-featured R
+interface to the \pkg{interpret} Python library powered by
+\CRANpkg{reticulate} \citep{R-reticulate}. In the next section, we'll
+discuss the \pkg{ebm} package in detail and provide several examples
+that cannot be replicated through use of the official \pkg{interpret}
+package in R.
 
 \section{\texorpdfstring{The \pkg{ebm}
 package}{The  package}}\label{the-package}
 
 The \pkg{ebm} package is an R wrapper around the explainable boosting
 functionality of the \pkg{interpret} module in Python, powered by
-\CRANpkg{reticulate}. The main features of this package, especially when
+\pkg{reticulate}. The main features of this package, especially when
 compared to the R package \pkg{interpret}, include:
 
 \begin{itemize}
@@ -256,8 +211,86 @@ compared to the R package \pkg{interpret}, include:
 
 \subsection{Environment set up}\label{environment-set-up}
 
-TODO: Briefly talk about setting up a Python environment, as well as the
-\texttt{install\_interpret()} function.
+First and foremost, the \pkg{ebm} package works through \pkg{reticulate}
+to interface with the underlying Python module \pkg{interpret}.
+Therefore, it's necessary to ensure your environment is configured
+properly so that all the necessary dependencies are installed and
+available (i.e., Python itself, along with any required libraries).
+Personally, I prefer to use pip and pyenv to manage my Python
+environments, but virtual environments and conda environments are safer
+and considered best practices. Therefore, in this section, I'll briefly
+cover setting up a simple virtual environment with the necessary
+dependencies. For further details and other available options, see
+\pkg{reticulate}'s extensive documentation. In particular, read more
+about configuring Python, setting up virtual environments, and
+installing Python libraries in the the following vignettes:
+
+\begin{Schunk}
+\begin{Sinput}
+vignette("versions", package = "reticulate")  # Python version configuration
+vignette("python_packages", package = "reticulate")  # mangaing envs and modules
+\end{Sinput}
+\end{Schunk}
+
+A Python virtual environment is just an isolated space with a Python
+interpreter and installed modules that are independent of your
+system-installed Python environment. Virtual environments effectively
+allow you to manage Python versions and dependencies separately across
+different projects. Here, we'll create a new virtual environment called
+\texttt{ebm-rjournal} and install the required \pkg{interpret} module.
+Note that it is not necesary to do this through \pkg{reticulate}. As
+noted above, I prefer to do this through the command line with \pkg{pip}
+\citep{Py-pip} and \pkg{pyenv} \citep{Py-pyenv}. Furthermore, tools for
+creating and managing virtual environments are part of the standard
+Python library (as well as external packages), so it's possible to set
+up virtual environments manually if you know what you're doing.
+
+Assuming you have a valid Python installation available, the code chunk
+below will create a virtual environment called \texttt{r-ebm} and
+install the \pkg{interpret} library into it. Note that the \pkg{ebm}
+package also includes an \texttt{install\_interpret()} function for
+convenience, which defaults to creating/using a virtual environment
+called \texttt{r-ebm} by default (see \texttt{?ebm::install\_interpret}
+for details)!
+
+\begin{Schunk}
+\begin{Sinput}
+library(reticulate)
+
+# Create a new environment
+virtualenv_create("r-ebm")
+
+# Install the interpret module
+virtualenv_install("r-ebm-abc", packages = "interpret")
+# Can also call `ebm::install_interet("r-ebm")`
+
+# Switch to the created virtual environment, if not already there
+# use_virtualenv("r-ebm", required = TRUE)
+
+# Load the interpret.glassbox sub-package
+interpret <- import("interpret")
+print(interpret$`__version__`)
+names(interpret$glassbox)
+\end{Sinput}
+\end{Schunk}
+
+\begin{Schunk}
+\begin{Soutput}
+#> [1] "0.6.9"
+\end{Soutput}
+\begin{Soutput}
+#>  [1] "APLRClassifier"                "APLRRegressor"                
+#>  [3] "ClassificationTree"            "DecisionListClassifier"       
+#>  [5] "ExplainableBoostingClassifier" "ExplainableBoostingRegressor" 
+#>  [7] "LinearRegression"              "LogisticRegression"           
+#>  [9] "merge_ebms"                    "RegressionTree"
+\end{Soutput}
+\end{Schunk}
+
+Note that \texttt{"ExplainableBoostingClassifier"} and
+\texttt{"ExplainableBoostingRegressor"} are the core modules from
+\pkg{interpret.glassbox} that power the \pkg{ebm} package. In this
+article, I used Python version .
 
 \subsection{Predicting and explaining policy ownership (the CoIL 2000
 challenge)}\label{predicting-and-explaining-policy-ownership-the-coil-2000-challenge}
@@ -398,7 +431,7 @@ sum(tictst$CARAVAN[ord[1:800]])  # number of 1s if we sort by highest prob
 \end{Soutput}
 \end{Schunk}
 
-The code chunk below uses the well-known \CRANpkg{rmse} package
+The code chunk below uses the well-known \CRANpkg{rms} package
 \citep{R-rms} to construct a flexible smooth calibration curve based on
 the test set predicted probabilities, along with some relevant
 performance statistics. For instance, the area under the receiver
@@ -408,7 +441,7 @@ operating characteristic curve based on the test data for this model is
 \begin{Schunk}
 \begin{Sinput}
 par(las = 1)
-rms::val.prob(probs[, 2L], y = tictst$CARAVAN, cex = 0.5)
+rms::val.prob(probs[, 2L], y = tictst$CARAVAN, cex = 0.5)  # See Figure XYZ
 \end{Sinput}
 \begin{figure}[!htb]
 
@@ -434,17 +467,17 @@ After training a model, it's often desirable to have a way to persist
 the model for future use without having to retrain it. In R, we can
 typically save the result of a model using \texttt{saveRDS()}.
 Alternatively, some packages provide a more native solution, like
-\CRANpkg{xgboost}'s \texttt{xgb.save()} function. These solutions will
-not work here since the connection to the underlying Python object is
-lost once the session is finished. The proper way to handle this is to
-use \pkg{reticulate}'s \texttt{py\_save\_object()} and
-\texttt{py\_load\_object()} functions to save and load the underlying
-Python object. This works by serializing the fitted EBM object using
-Python's \pkg{pickle} module. Advanced \pkg{reticulate} users could also
-rely on rely on the \pkg{joblib} module or even exporting the fitted
-model to ONNX (Open Neural Network Exchange) via the \pkg{ebm2onnx}
-module, depending on the need. For more details on persisting a fitted
-model in Python visit
+\CRANpkg{xgboost}'s \texttt{xgb.save()} function \citep{R-xgboost}.
+These solutions will not work here since the connection to the
+underlying Python object is lost once the session is finished. The
+proper way to handle this is to use \pkg{reticulate}'s
+\texttt{py\_save\_object()} and \texttt{py\_load\_object()} functions to
+save and load the underlying Python object. This works by serializing
+the fitted EBM object using Python's \pkg{pickle} module. Advanced
+\pkg{reticulate} users could also rely on rely on the \pkg{joblib}
+module or even exporting the fitted model to ONNX (Open Neural Network
+Exchange) via the \pkg{ebm2onnx} module, depending on the need. For more
+details on persisting a fitted model in Python visit
 \url{https://scikit-learn.org/stable/model_persistence.html}. Here we'll
 show how to persist a fitted EBM model using both \pkg{pickle} (through
 \pkg{reticulate}'s built-in functions mentioned above), as well as
@@ -548,9 +581,9 @@ Fitted \texttt{"EBM"} objects can be understood and visualized using the
 generic \texttt{plot()} method. By default, \texttt{plot()} relies on
 \CRANpkg{ggplot2} \citep{R-ggplot2} for variable importance and main
 effect plots; for visualizing pairwise interactions, it relies on
-\CRANpkg{lattice}'s \texttt{levelplot()} function. For convenience,
-we'll also use \CRANpkg{patchwork} \citep{R-patchwork} for configuring
-the layout for displays with multiple plots.
+\CRANpkg{lattice}'s \texttt{levelplot()} function \citep{R-lattice}. For
+convenience, we'll also use \CRANpkg{patchwork} \citep{R-patchwork} for
+configuring the layout for displays with multiple plots.
 
 Below, we use the \texttt{plot()} method to display a few global
 summaries of the fitted model. First, we display the overall term
@@ -567,7 +600,7 @@ library(patchwork)
 
 theme_set(theme_bw())  # my preferred theme for ggplot2
 
-# Plot feature importance
+# Plot feature importance (see Figure XYZ)
 plot(tic_ebm, n_terms = 15)  
 \end{Sinput}
 \begin{figure}[!htb]
@@ -596,7 +629,7 @@ such plots.
 
 \begin{Schunk}
 \begin{Sinput}
-plot(tic_ebm, "PPERSAUT", horizontal = TRUE) +  # main effect plot
+plot(tic_ebm, "PPERSAUT", horizontal = TRUE) +  # See Figure XYZ
   ggplot(tictrn, aes(PPERSAUT)) +  # add distribution plot
   geom_bar() + 
   scale_x_discrete(drop = FALSE) +  # don't drop zero counts 
@@ -703,7 +736,7 @@ tic_ebm_mono$monotonize("APERSAUT", increasing = FALSE)
 #>                               smoothing_rounds=500)
 \end{Soutput}
 \begin{Sinput}
-# Display results side by side
+# Display results side by side (see Figure XYZ)
 plot(tic_ebm, term = "APERSAUT") + ggtitle("Original") +
   plot(tic_ebm_mono, term = "APERSAUT") + ggtitle("Monotonized")
 \end{Sinput}
@@ -783,14 +816,14 @@ plt$to_ordered_dict()$data[[1L]]
 
 The visualizations discussed so far are examples of \emph{global
 explanations}. We can also explain the model's output at the local
-(i.e., prediction) level. This is more commonly done for general machine
-learning models using techniques like SHAP (SHapley Additive
-exPlanations) \citep{lundberg-2017-shap} and LIME (Local Interpretable
-Model-agnostic Explanations) \citep{ribeiro-2016-lime}. Techniques like
-these typically make assumptions about independence and so forth and
-only provide an approximation to how features contribute to a model's
-output. With EBMs, we can visualize exactly how each term in the model
-contributes to a specific prediction (this is true for GAMs in general).
+(i.e., prediction) level. This is more commonly done for general ML
+models using techniques like SHAP (SHapley Additive exPlanations)
+\citep{lundberg-2017-shap} and LIME (Local Interpretable Model-agnostic
+Explanations) \citep{ribeiro-2016-lime}. Techniques like these typically
+make assumptions about independence and so forth and only provide an
+approximation to how features contribute to a model's output. With EBMs,
+we can visualize exactly how each term in the model contributes to a
+specific prediction (this is true for GAMs in general).
 
 Below, we call the \texttt{plot()} method to explain the prediction
 associated with the first instance of the test sample. The EBM model
@@ -809,7 +842,7 @@ displayed in Figure \ref{fig:tic-ebm-local}.
 \begin{Sinput}
 newx <- subset(tictst[1L, ], select = -CARAVAN)
 newy <- tictst$CARAVAN[1L]  # not useful unless `interactive = TRUE`
-plot(tic_ebm, local = TRUE, X = newx, y = newy)
+plot(tic_ebm, local = TRUE, X = newx, y = newy)  # See Figure XYZ
 \end{Sinput}
 \begin{figure}[!htb]
 
@@ -817,7 +850,7 @@ plot(tic_ebm, local = TRUE, X = newx, y = newy)
 
 }
 
-\caption[ABC..]{ABC...}\label{fig:tic-ebm-local}
+\caption[ABC]{ABC.}\label{fig:tic-ebm-local}
 \end{figure}
 \end{Schunk}
 
@@ -894,7 +927,7 @@ predictive feature in the model.
 
 \begin{Schunk}
 \begin{Sinput}
-plot(als_ebm, n_terms = 10)  # Figure XYZ
+plot(als_ebm, n_terms = 10)  # See Figure XYZ
 \end{Sinput}
 \begin{figure}[!htb]
 
@@ -913,7 +946,7 @@ term contribution for
 
 \begin{Schunk}
 \begin{Sinput}
-plot(als_ebm, term = c("Onset.Delta", "last.slope.weight"))
+plot(als_ebm, term = c("Onset.Delta", "last.slope.weight"))  # See Figure XYZ
 \end{Sinput}
 \begin{figure}[!htb]
 
@@ -928,18 +961,19 @@ plot(als_ebm, term = c("Onset.Delta", "last.slope.weight"))
 Compared to ``black-box'' models, like random forests and deep neural
 networks, EBMs are considered ``glass-box'' models that can be
 competitively accurate while also maintaining a higher degree of
-transparency and explainability. However, EBMs become readily less
-transparent and harder to interpret in high-dimensional settings with
-many predictor variables; they also become more difficult to use in
-production due to increases in scoring time. We propose a simple
-solution based on the least absolute shrinkage and selection operator
-(LASSO) that can help introduce sparsity by reweighting the individual
-model terms and removing the less relevant ones, thereby allowing these
-models to maintain their transparency and relatively fast scoring times
-in higher-dimensional settings. In short, post-processing a fitted EBM
-with many (i.e., possibly hundreds or thousands) of terms using the
-LASSO can help reduce the model's complexity and drastically improve
-scoring time. For methodological (and software) details, see
+transparency and explainability. However, as discussed earlier, EBMs
+become readily less transparent and harder to interpret in
+high-dimensional settings with many predictor variables; they also
+become more difficult to use in production due to increases in scoring
+time. We propose a simple solution based on the least absolute shrinkage
+and selection operator (LASSO) \citep{tibshirani-1996-lasso} that can
+help introduce sparsity by reweighting the individual model terms and
+removing the less relevant ones, thereby allowing these models to
+maintain their transparency and relatively fast scoring times in
+higher-dimensional settings. In short, post-processing a fitted EBM with
+many (i.e., possibly hundreds or thousands) of terms using the LASSO can
+help reduce the model's complexity and drastically improve scoring time.
+For methodological (and software) details, see
 \citet{greenwell-2023-explainable}.
 
 We'll illustrate the basic idea using the previous model, which contains
@@ -984,8 +1018,8 @@ head(cbind(
 \end{Soutput}
 \end{Schunk}
 
-Next, we use the
-\href{https://cran.r-project.org/package=glmnet}{glmnet} package to fit
+Next, we use the \CRANpkg{glmnet}
+\citep{friedman-2010-regularization, tay-2023-elastic} package to fit
 the LASSO path to the new data set comprised of the individual term
 contributions. We then assess performance using the associated test set
 and collect the results.
@@ -1037,6 +1071,7 @@ function of the number of terms in the compressed model.
 
 \begin{Schunk}
 \begin{Sinput}
+# Plot results (see Figure 7)
 par(mfrow = c(1, 2), mar = c(4, 4, 0.1, 0.1), cex.lab = 0.95, 
     cex.axis = 0.8, mgp = c(2, 0.7, 0), tcl = -0.3, las = 1)
 plot(lasso, xvar = "lambda", col = adjustcolor("darkred", alpha.f = 0.3),
@@ -1046,16 +1081,23 @@ plot(res[, c("n_terms", "mse")], type = "l", las = 1,
      xlab = "Number of terms", ylab = "Test MSE")
 abline(h = mse_tst, lty = 2, col = "darkred")
 \end{Sinput}
+\begin{figure}[!htb]
 
+{\centering \includegraphics[width=1\linewidth]{greenwell-ebm_files/figure-latex/als-ebm-lassso-plot-1} 
 
-\begin{center}\includegraphics[width=1\linewidth]{greenwell-ebm_files/figure-latex/als-ebm-lassso-plot-1} \end{center}
+}
 
+\caption[ABC]{ABC.}\label{fig:als-ebm-lassso-plot}
+\end{figure}
 \end{Schunk}
 
-The test MSE for the compressed model is 0.262219\ldots{}
+The test MSE for the compressed model is 0.262, which is actually better
+than the original model with all 702 terms! Quite impressive in this
+case.
 
 Lastly, we can call the \texttt{\$scale()} and \texttt{\$sweep()}
-methods to reweight and purge any unused terms from the model:
+methods to reweight and purge any unused terms from the compressed EBM
+model:
 
 \begin{Schunk}
 \begin{Sinput}
@@ -1081,54 +1123,64 @@ length(als_ebm_lasso$term_names_)
 #> [1] 23
 \end{Soutput}
 \begin{Sinput}
-plot(als_ebm_lasso)  # show new feature importance scores
+plot(als_ebm_lasso)  # show new term importance scores (see Figure 8)
 \end{Sinput}
+\begin{figure}[!htb]
 
+{\centering \includegraphics[width=1\linewidth]{greenwell-ebm_files/figure-latex/als-ebm-lasso-scale-1} 
 
-\begin{center}\includegraphics[width=1\linewidth]{greenwell-ebm_files/figure-latex/als-ebm-lasso-scale-1} \end{center}
+}
 
+\caption[ABC]{ABC.}\label{fig:als-ebm-lasso-scale}
+\end{figure}
 \end{Schunk}
 
 And just as a sanity check, we can see that the compressed (i.e.,
-reduced) model does produce the right predictions. An ROC curve via the
-\href{https://cran.r-project.org/package=pROC}{pROC} is also constructed
-and shown below.
+reduced) model does produce the right predictions by comparing it to the
+output from the corresponding LASSO model:
 
 \begin{Schunk}
 \begin{Sinput}
 # Compare predictions between LASSO and compressed EBM (should be the same!)
 head(cbind(
-  "EBM (LASSO)" = predict(als_ebm_lasso, newdata = alstst),
-  "LASSO" = predict(lasso, newx = X_tst, s = lambda, type = "response"))
+  "EBM (Compressed)" = predict(als_ebm_lasso, newdata = alstst),
+  "LASSO" = unname(predict(lasso, newx = X_tst, s = lambda, type = "response")))
 )
 \end{Sinput}
 \begin{Soutput}
-#>      EBM (LASSO)         s1
-#> [1,]  -0.2869531 -0.2869531
-#> [2,]  -0.3862899 -0.3862899
-#> [3,]  -0.4750451 -0.4750451
-#> [4,]  -0.2647092 -0.2647092
-#> [5,]  -0.8570664 -0.8570664
-#> [6,]  -1.0047789 -1.0047789
+#>      EBM (Compressed)           
+#> [1,]       -0.2869531 -0.2869531
+#> [2,]       -0.3862899 -0.3862899
+#> [3,]       -0.4750451 -0.4750451
+#> [4,]       -0.2647092 -0.2647092
+#> [5,]       -0.8570664 -0.8570664
+#> [6,]       -1.0047789 -1.0047789
 \end{Soutput}
 \end{Schunk}
 
 \citet{greenwell-2023-explainable} provide a similar compression
 analysis applied to the CoIL 2000 example via interfacing directly with
-the Python \pkg{interpret} module through \pkg{reticulate}.
+the \pkg{interpret} Python library using \pkg{reticulate}.
 
-\subsection{Parallelization}\label{parallelization}
+\subsection{Parallelism in EBMs}\label{parallelism-in-ebms}
 
-TBD. Use bike share example here. Note that negative integers are
-interpreted using \pkg{joblib}'s formula:
-\texttt{n\_cpus\ +\ 1\ +\ n\_jobs}. For example, setting
-\texttt{n\_jobs\ =\ -2} will result in using all threads except for one.
-The default is \texttt{n\_jobs\ =\ -1} which results in using all
-available CPUs.
+The core implementation of EBMs through the \pkg{interpret} Python
+library is parallelizable, and takes advantage of \pkg{joblib}
+\citep{Py-joblib} to provide multi-core and multi-machine
+parallelization. Note that this differs from traditional parallelization
+in R through packages like \pkg{parallel} \citep{R-parallel}. Here the
+parallelization is taken care of completely on the Python side.
 
-TODO: Describe what's happening in the code. Also mention the defaults.
+This can be controlled in the call to \texttt{ebm()} via the
+\texttt{n\_jobs} argument. Note that negative integers are interpreted
+using \pkg{joblib}'s formula: \texttt{n\_cpus\ +\ 1\ +\ n\_jobs}. For
+example, setting \texttt{n\_jobs\ =\ -2} will result in using all
+threads except for one. The default is \texttt{n\_jobs\ =\ -1} which
+results in using all available CPUs.
+
 Below is a brief example using the \texttt{Bikeshare} data available in
-\CRANpkg{ISLR2} \citep{R-ISLR2}. Outer bags are used to generate error
+the \CRANpkg{ISLR2} \citep{R-ISLR2} package. Note that EBMs are
+parallelized at the outer bags level, which are used to generate error
 bounds and help with smoothing the graphs.
 
 \begin{Schunk}
@@ -1144,7 +1196,7 @@ system.time({
 \end{Sinput}
 \begin{Soutput}
 #>    user  system elapsed 
-#>   0.052   0.007   7.473
+#>   0.053   0.007   7.789
 \end{Soutput}
 \begin{Sinput}
 # Use one CPU
@@ -1155,7 +1207,7 @@ system.time({
 \end{Sinput}
 \begin{Soutput}
 #>    user  system elapsed 
-#>  46.068   0.580  46.693
+#>  45.864   0.577  46.586
 \end{Soutput}
 \begin{Sinput}
 # Use all CPUs, but no bagging
@@ -1166,34 +1218,76 @@ system.time({
 \end{Sinput}
 \begin{Soutput}
 #>    user  system elapsed 
-#>   0.024   0.002   1.150
+#>   0.024   0.002   1.111
 \end{Soutput}
 \begin{Sinput}
-# Plot results (Figure XYZ)
+# Plot results (see Figure 9)
 plot(ebm2, term = "temp") + plot(ebm3, term = "temp") 
 \end{Sinput}
 \begin{figure}[!htb]
 
-{\centering \includegraphics[width=1\linewidth]{greenwell-ebm_files/figure-latex/bikeshare-parallel-1} 
+{\centering \includegraphics[width=1\linewidth]{greenwell-ebm_files/figure-latex/ebm-parallelism-1} 
 
 }
 
-\caption[ABC]{ABC. Left: ABC. Right: ABC.}\label{fig:bikeshare-parallel}
+\caption[ABC]{ABC. Left: ABC. Right: ABC.}\label{fig:ebm-parallelism}
+\end{figure}
+\end{Schunk}
+
+\subsection{Merging EBMs into one}\label{merging-ebms-into-one}
+
+The underlying \pkg{interpret} Python library allows you to merges EBM
+models trained on similar data sets that have the same set of features.
+This can be useful for a number of reasons. For instance, you can fit
+several independent EBM models to implement your own outer bagging
+strategy. Or perhaps you've fit several EBMs over time as data have
+become available and you want to merge several of the models into one.
+
+In the code chunk below, we fit several EBMs using R's built in
+\texttt{mtcars} data set (see \texttt{?datasets::mtcars} for details)
+and then merge them into a single EBM model. The merged EBM model
+retains the glassbox interpretability of the component EBMs, allowing us
+to view both global and local explanations of the combined model. Note
+that outer bagging is turned off for the individual component EBMs
+fitted below, but the merged model displays uncertaintly in the learned
+graph for \texttt{cyl} (i.e., the number of cylinders).
+
+\begin{Schunk}
+\begin{Sinput}
+# Generate list of EBMs with different random seeds
+ebms <- lapply(1:3, FUN = function(i) {
+  ebm(mpg ~ ., data = mtcars, outer_bags = 1, random_state = i, obj = "rmse")
+})
+
+# Merge EBMs into one
+merged <- do.call(merge, args = ebms)
+
+# Display plots for "cyl" term in 2x2 grid (see Figure 10)
+cyl_plots <- lapply(c(ebms, merged), FUN = plot, term = "cyl")
+gridExtra::grid.arrange(grobs = cyl_plots, nrow = 2)
+\end{Sinput}
+\begin{figure}[!htb]
+
+{\centering \includegraphics[width=1\linewidth]{greenwell-ebm_files/figure-latex/ebm-merging-1} 
+
+}
+
+\caption[ABC]{ABC.}\label{fig:ebm-merging}
 \end{figure}
 \end{Schunk}
 
 \subsection{Tuning strategies}\label{tuning-strategies}
 
 Recommended tuning strategies for EBMs are discussed in the
-\pkg{interpret} module's FAQ: \url{https://interpret.ml/docs/faq.html}.
+\pkg{interpret} library's FAQ: \url{https://interpret.ml/docs/faq.html}.
 We outline the essential points here. Similar to random forests, the
 default hyperparameters for EBMs tend to perform reasonably well on most
-problems; hence, we stuck with the default for the examples in this
-paper. A reasonable strategy is to train an initial model using the
+problems; hence, we mostly stuck with the defaults for the examples in
+this paper. A reasonable strategy is to train an initial model using the
 defaults and looking through the learned functions to catch unexpected
 or abnormal behavior---oftentimes, these graphs can help indicate which
 parameters should be tuned. Here are some general recommendations from
-the \pkg{interpret} module developers:
+the \pkg{interpret} developers:
 
 \begin{itemize}
 \item
@@ -1229,10 +1323,31 @@ the \pkg{interpret} module developers:
 Detailed discussion on each hyperparameter available for tuning can be
 found here: \url{https://interpret.ml/docs/hyperparameters.html}.
 
-\section{Discussion}\label{discussion}
+\section{Summary}\label{summary}
 
-We gave a brief introduction to EBMs and a detailed walk through of the
-new R interface provided by the \pkg{ebm} package.
+EBMs are glassbox models that can provide both competitive accuracy and
+transparency through exact explainability. Static and interactive plots
+can be used to graphically examine the model at both the global and
+local level. For instance, a model can be explained on the global level
+by visualizing term importance scores, main effects, and important
+pairwise interactions.
+
+In this paper, we showed how to fit EBMs using the \pkg{ebm} package,
+which provides a direct interface to the \pkg{interpret} Python library.
+The \pkg{ebm} package provides nearly all the functionality of the
+corresponding Python library, which is not the case for the associated
+\pkg{interpret} package in R. For instance, I showed how to fit both
+classification and regression models (including a model for counts using
+Poisson deviance). I showed how to explain an EBM's output at both the
+global and local level using either static or interactive plots. Further
+code examples also demonstrated how to use some of the more advanced
+functionality, like parallelism, merging several EBM models into one,
+and model compressing (i.e., feature/term reduction) by post-processing
+an EBM model with the LASSO. Further improvements to the \pkg{ebm}
+package can also be made by providing explicit support for converting
+fitted EBM models to ONNX \citep{onnx} using the wonderful
+\pkg{ebm2onnx} package \citep{Py-ebm2onnx}, and model editing via GAM
+changer \citep{Py-gamchanger}.
 
 \bibliography{greenwell-ebm.bib}
 
