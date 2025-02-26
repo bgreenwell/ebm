@@ -38,27 +38,27 @@ particular, GLMs have three components:
   logistic regression, for instance, this is the logit function.
 \end{enumerate}
 
-In essence, GLMs have the following basic form: \begin{equation*}
+In essence, GLMs have the following basic form: \begin{equation}
   g\left(E\left[Y|\boldsymbol{x}\right]\right) = \beta_0 + \sum_{j=1}^p \beta_jx_j,
-\end{equation*} where \(Y \sim\) some exponential family distribution,
-\(g\) is the link function (e.g., typically the identity function for
-linear models, the logit for logistic regression, or the log link for
-Poisson regression), and
+  \label{eqn:glm}
+\end{equation} where \(Y \sim\) some exponential family distribution,
+\(g\) is the link function described above, and
 \(\boldsymbol{\beta} = \left(\beta_0, \beta_1, \dots, \beta_p\right)^\top\)
 are fixed but unknown regression coefficients to be estimated from the
 data (typically, via some form of maximum likelihood estimation). The
 definitive reference for GLMs has always been the monograph by
-\citet{mccullagh-1989-glm}.
+\citet{mccullagh-1989-glm}. \citet{dunn-2018-glm} provide a more modern
+treatment of GLMs, which also focuses on R.
 
 Generalized additive models (GAMs) \citep{hastie-1990-gam} extend GLMs
-by replacing the systematic component of @ref(eq:glm) with a sum of
-nonlinear smooth functions to get \begin{equation}
-  g\left(E\left[Y|\boldsymbol{x}\right]\right) = \beta_0 + \sum_{j=1}^p f_j\left(x_j\right),
+by replacing the systematic component of \eqref{eqn:glm} with a sum of
+nonlinear smooth functions to produce \begin{equation}
+  g\left(E\left[Y|\boldsymbol{x}\right]\right) = \beta_0 + \sum_{j=1}^p f_j\left(x_j\right).
   \label{eqn:gam}
-\end{equation} The functions \(f_j\) are general enough that they can
-absorb the intercept (hence, sometimes we may omit the bias term
-\(\beta_0\) in \eqref{eqn:gam}). Model \eqref{eqn:gam} is quite flexible
-in how the response depends on the predictors. Further, GAMs maintain
+\end{equation} The term functions \(f_j\) are general enough that they
+can absorb the intercept, and hence, sometimes we may omit \(\beta_0\)
+in \eqref{eqn:gam}. Model \eqref{eqn:gam} is quite flexible in how the
+response depends on the predictors. Further, GAMs maintain
 explainability since the model's output can be understood by simply
 plotting the individual term contributions (sometimes called shape
 functions) \(f_j\left(x_j\right)\). GAMs can also include interactions
@@ -76,60 +76,59 @@ called FAST\footnote{As far as I can tell, FAST is not an acronym for
   anything in particular.}. In short, FAST is a novel, computationally
 efficient method for ranking all possible pairs of feature candidates
 for inclusion in the model. The resulting model consists of univariate
-terms and a small number of pairwise interaction terms. Since
-GA\textsuperscript{2}Ms are low-dimensional, they can still be
-visualized and interpreted by users while potentially being more
-accurate. A GA\textsuperscript{2}M has the general form \begin{equation}
-  g\left(E\left[Y|\boldsymbol{x}\right]\right) = \sum f_i\left(x_i\right) + \sum f_{ij}\left(x_i, x_j\right).
+(i.e., main effect) terms and a small number of pairwise interactions.
+Since GA\textsuperscript{2}Ms are low-dimensional, they can still be
+visualized and interpreted relatively easily by users while also
+potentially being more accurate. A GA\textsuperscript{2}M has the
+general form \begin{equation}
+  g\left(E\left[Y|\boldsymbol{x}\right]\right) = \sum f_i\left(x_i\right) + \sum f_{ij}\left(x_i, x_j\right) \quad \left(i \ne j\right).
   \label{eqn:ga2m}
 \end{equation} Here we've simply absorbed the bias term (or intercept)
 into the shape functions \(f_i\). In contrast to tradition GAMs
 \eqref{eqn:gam}, the shape functions in \eqref{eqn:ga2m} are not
 necessarily smooth. In particular, modern GA\textsuperscript{2}Ms often
-rely on tree-based methods and gradient boosting
-\citep{greenwell-2022-tree}, which tend to produce more rigid step
-functions.
+rely on tree-based methods \citep{greenwell-2022-tree}, which tend to
+produce more rigid step functions.
 
-\section{Explainable boosting
-machines}\label{explainable-boosting-machines}
+\section{Explainable boosting machines}\label{sec:ebm}
 
-Explainable boosting machines \citep{nori-2019-interpret}, or EBMs for
-short, are a modern class of GA\textsuperscript{2}Ms, that can offer
-both competitive accuracy and explicit transparency and exact
-explainability, which are often considered to be two opposing goals of a
-machine learning (ML) model. For example, full-complexity models, like
-random forests \citep{breiman-2001-rf}, tend to be highly competitive in
-terms of accuracy, but are readily less transparent and explainable (due
-in part to the high-order interaction effects often captured by such
-black-box models). Essentially, with EBMs, it's possible to ``have your
-cake and eat it too.'\,'
+In Section \ref{sec:ebm}. Explainable boosting machines
+\citep{nori-2019-interpret}, or EBMs for short, are a modern class of
+GA\textsuperscript{2}Ms, that can offer both competitive accuracy and
+explicit transparency through exact explainability, which are often
+considered to be two opposing goals of a machine learning (ML) model.
+For example, full-complexity models, like random forests
+\citep{breiman-2001-rf}, tend to be highly competitive in terms of
+accuracy, but are readily less transparent and explainable (due in part
+to the high-order interaction effects often captured by such black-box
+models). Essentially, with EBMs, it's possible to ``have your cake and
+eat it too.''
 
 In short, EBMs have the general form
 
 \begin{equation}
-g\left(E\left[y\right]\right) = \theta_0 + \sum f_i\left(x_i\right) + \sum f_{ij}\left(x_i, x_j\right),
+g\left(E\left[Y|\boldsymbol{x}\right]\right) = \theta_0 + \sum f_i\left(x_i\right) + \sum f_{ij}\left(x_i, x_j\right) \quad \left(i \ne j\right),
   \label{eqn:ebm}
 \end{equation}
 
-Where blah, blah, blah @ref(eq:ga2m)
-
-where
+where, similar to GA\textsuperscript{2}Ms \eqref{eqn:ga2m},
 
 \begin{itemize}
 \item
-  \(g\) is a \emph{link function} that allows the model to handle
-  various response types (e.g., the \emph{logit} link for logistic
-  regression, the identify function for ordinary regression with
-  continuous outcomes, or Poisson deviance for modeling counts);
+  \(g\) is a link function that allows the model to handle various
+  response types (e.g., the logit link for logistic regression or
+  Poisson deviance for modeling counts and rates);
 \item
   \(\theta_0\) is a constant intercept (or bias term);
 \item
-  \(f_i\) is the \emph{term contribution} (or \emph{shape function}) for
-  predictor \(x_i\) (i.e., it captures the main effect of \(x_i\));
+  \(f_i\) is the term contribution (or shape function) for predictor
+  \(x_i\) (i.e., it captures the main effect of \(x_i\) on
+  \(E\left[Y|\boldsymbol{x}\right]\));
 \item
   \(f_{ij}\) is the term contribution for the pair of predictors \(x_i\)
   and \(x_j\) (i.e., it captures the joint effect, or pairwise
-  interaction effect of \(x_i\) and \(x_j\)).
+  interaction effect of \(x_i\) and \(x_j\) on
+  \(E\left[Y|\boldsymbol{x}\right]\)).
 \end{itemize}
 
 Similar to GA\textsuperscript{2}Ms, the pairwise interaction terms are
@@ -302,7 +301,7 @@ data set, which we'll obtain from the R package \CRANpkg{kernlab}
 variables, including product usage data and socio-demographic data
 derived from zip area codes. The goal of the challenge was to be able to
 answer the following question: ``Can you predict who would be interested
-in buying a caravan insurance policy and give an explanation of why?'\,'
+in buying a caravan insurance policy and give an explanation of why?''
 Hence, being able to explain your model's predictions was key to being
 successful in this challenge.
 
