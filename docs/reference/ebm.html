@@ -46,7 +46,13 @@ blackbox models while remaining completely interpretable."><!-- mathjax --><scri
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
-      <ul class="navbar-nav"></ul></div>
+      <ul class="navbar-nav"><li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/bgreenwell/ebm/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div>
 
     
   </div>
@@ -54,7 +60,7 @@ blackbox models while remaining completely interpretable."><!-- mathjax --><scri
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Explainable Boosting Machine (EBM)</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/bgreenwell/ebm/blob/HEAD/R/ebm.R" class="external-link"><code>R/ebm.R</code></a></small>
       <div class="d-none name"><code>ebm.Rd</code></div>
     </div>
 
@@ -154,7 +160,31 @@ sets.</p></li>
 <li><p>Percentage (<code>validation_size</code> &lt; 1.0): Percentage of the data to put in the
 validation sets.</p></li>
 <li><p>0: Turns off early stopping. Outer bags have no utility. Error bounds will</p></li>
-</ul><p>boosting cycles that will actively contribute to improving the model's
+</ul></dd>
+
+
+<dt>outer_bags</dt>
+<dd><p>Number of outer bags. Outer bags are used to generate error bounds and help with smoothing the graphs.</p></dd>
+
+
+<dt>inner_bags</dt>
+<dd><p>Number of inner bags. Default is 0 which turns off inner
+bagging.</p></dd>
+
+
+<dt>learning_rate</dt>
+<dd><p>Learning rate for boosting. Deafult is 0.04.</p></dd>
+
+
+<dt>greedy_ratio</dt>
+<dd><p>The proportion of greedy boosting steps relative to
+cyclic boosting steps. A value of 0 disables greedy boosting, effectively
+turning it off. Default is 10.</p></dd>
+
+
+<dt>cyclic_progress</dt>
+<dd><p>This parameter specifies the proportion of the
+boosting cycles that will actively contribute to improving the model's
 performance. It is expressed as a logical or numeric between 0 and 1, with
 the default set to <code>TRUE</code> (1.0), meaning 100% of the cycles are expected to
 make forward progress. If forward progress is not achieved during a cycle,

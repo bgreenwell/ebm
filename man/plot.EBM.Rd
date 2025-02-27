@@ -13,7 +13,7 @@
   init_score = NULL,
   interactive = FALSE,
   n_terms = NULL,
-  geom = c("point", "col"),
+  geom = c("point", "col", "bar"),
   mapping = NULL,
   aesthetics = list(),
   horizontal = FALSE,
@@ -57,8 +57,8 @@ terms in the fitted model.}
 \item{geom}{Character string specifying which type of plot to construct for
 terms associated with categorical features. Current options are:
 \itemize{
-\item \code{geom = "col"} uses \link[ggplot2:geom_bar]{geom_col} to construct a bar chart
-of the scores.
+\item \code{geom = "bar"} (or \code{"col"}) uses \link[ggplot2:geom_bar]{geom_col} to
+construct a bar chart of the scores.
 \item \code{geom = "point"} uses \link[ggplot2:geom_point]{geom_point} to construct a
 Cleveland dot plot of the term scores.
 }

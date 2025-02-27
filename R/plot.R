@@ -33,8 +33,8 @@ x <- y <- z <- y_error <- y_lwr <- y_upr <- NULL
 #' @param geom Character string specifying which type of plot to construct for
 #' terms associated with categorical features. Current options are:
 #'
-#'  * `geom = "col"` uses [geom_col][ggplot2::geom_col] to construct a bar chart
-#'  of the scores.
+#'  * `geom = "bar"` (or `"col"`) uses [geom_col][ggplot2::geom_col] to
+#'  construct a bar chart of the scores.
 #'
 #'  * `geom = "point"` uses [geom_point][ggplot2::geom_point] to construct a
 #'  Cleveland dot plot of the term scores.
@@ -102,7 +102,7 @@ plot.EBM <- function(
     init_score = NULL,
     interactive = FALSE,
     n_terms = NULL,
-    geom = c("point", "col"),
+    geom = c("point", "col", "bar"),
     mapping = NULL,
     aesthetics = list(),
     horizontal = FALSE,
@@ -431,7 +431,7 @@ gg_plot_importance <- function(
 
   # Generate plot
   p <- ggplot2::ggplot(df, ggplot2::aes(x = reorder(x, y), y = y))
-  if (geom == "col") {
+  if (geom == "col" || geom == "bar") {
     p <- p + do.call(
       what = ggplot2::geom_col,
       args = c(list(mapping = mapping), aesthetics)

@@ -36,7 +36,13 @@
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
-      <ul class="navbar-nav"></ul></div>
+      <ul class="navbar-nav"><li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/bgreenwell/ebm/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div>
 
     
   </div>
@@ -44,7 +50,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Interpret plots for fitted EBM objects</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/bgreenwell/ebm/blob/HEAD/R/plot.R" class="external-link"><code>R/plot.R</code></a></small>
       <div class="d-none name"><code>plot.EBM.Rd</code></div>
     </div>
 
@@ -64,7 +70,7 @@
 <span>  init_score <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  interactive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n_terms <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  geom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"point"</span>, <span class="st">"col"</span><span class="op">)</span>,</span>
+<span>  geom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"point"</span>, <span class="st">"col"</span>, <span class="st">"bar"</span><span class="op">)</span>,</span>
 <span>  mapping <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  aesthetics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  horizontal <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -125,8 +131,8 @@ terms in the fitted model.</p></dd>
 
 <dt>geom</dt>
 <dd><p>Character string specifying which type of plot to construct for
-terms associated with categorical features. Current options are:</p><ul><li><p><code>geom = "col"</code> uses <a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a> to construct a bar chart
-of the scores.</p></li>
+terms associated with categorical features. Current options are:</p><ul><li><p><code>geom = "bar"</code> (or <code>"col"</code>) uses <a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a> to
+construct a bar chart of the scores.</p></li>
 <li><p><code>geom = "point"</code> uses <a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a> to construct a
 Cleveland dot plot of the term scores.</p></li>
 </ul><p>Default is <code>"point"</code>.</p></dd>

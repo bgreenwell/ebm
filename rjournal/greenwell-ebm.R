@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 ## ----reticulate-help, eval=FALSE----------------------------------------------
 #> vignette("versions", package = "reticulate")  # Python version configuration
-#> vignette("python_packages", package = "reticulate")  # mangaing envs and modules
+#> vignette("python_packages", package = "reticulate")  # managing envs and deps
 
 
 ## ----ebm-setup, eval=FALSE----------------------------------------------------
@@ -27,8 +27,8 @@ knitr::opts_chunk$set(
 #> virtualenv_create("r-ebm")
 #> 
 #> # Install the interpret module
-#> virtualenv_install("r-ebm-abc", packages = "interpret")
-#> # Can also call `ebm::install_interet("r-ebm")`
+#> virtualenv_install("r-ebm", packages = "interpret")
+#> # Can also call `ebm::install_interpret("r-ebm")`
 #> 
 #> # Switch to the created virtual environment, if not already there
 #> # use_virtualenv("r-ebm", required = TRUE)
@@ -71,14 +71,19 @@ labels <- predict(tic_ebm, newdata = tictst, type = "class")
 table("Observed" = tictst$CARAVAN, "Predicted" = labels)
 
 
+## ----tic-ebm-predict-se-------------------------------------------------------
+# Compute predictions on the link (i.e., logit) scale with standard errors
+head(predict(tic_ebm, newdata = tictst, type = "link", se_fit = TRUE))
+
+
 ## ----tic-ebm-cumulative-gains-------------------------------------------------
 ord <- order(probs[, 2L], decreasing = TRUE)
 sum(tictst$CARAVAN[ord[1:800]])  # number of 1s if we sort by highest prob
 
 
-## ----tic-ebm-calibration, fig.cap="Calibration curve and validation statistics based on the the test set."----
+## ----tic-ebm-calibration, fig.cap="Calibration curve and validation statistics for the fitted EBM model based on the the test set."----
 par(las = 1)
-rms::val.prob(probs[, 2L], y = tictst$CARAVAN, cex = 0.5)  # See Figure XYZ
+rms::val.prob(probs[, 2L], y = tictst$CARAVAN, cex = 0.5)  # See Figure 1
 
 
 ## ----tic-ebm-pickle-----------------------------------------------------------
@@ -91,7 +96,7 @@ reticulate::py_save_object(tic_ebm, filename = "tic_ebm.pkl")
 
 
 ## ----tic-ebm-joblib-----------------------------------------------------------
-joblib <- reticulate::import("joblib")  # assumes joblib module is available
+joblib <- reticulate::import("joblib")  # assumes the joblib pkg is available
 
 # "Dump" the fitted EBM model into a pickle file
 joblib$dump(tic_ebm, filename = "tic_ebm_joblib.pkl")
@@ -100,18 +105,18 @@ joblib$dump(tic_ebm, filename = "tic_ebm_joblib.pkl")
 (tic_ebm <- as.ebm(joblib$load("tic_ebm_joblib.pkl")))
 
 
-## ----tic-ebm-importance, fig.cap="Term importance scores computed as the mean absolute score for each term in the fitted model."----
+## ----tic-ebm-importance, fig.cap="Term importance scores from the fitted EBM model computed as the mean absolute contribution from each term in the model. Only the top 15 terms are displayed here."----
 library(ggplot2)
 library(patchwork)
 
 theme_set(theme_bw())  # my preferred theme for ggplot2
 
-# Plot feature importance (see Figure XYZ)
+# Plot term importance scores (see Figure 2)
 plot(tic_ebm, n_terms = 15)  
 
 
-## ----tic-ebm-term-PPERSAUT, fig.cap="Main effect of $\\mathtt{PPERSAUT}$."----
-plot(tic_ebm, "PPERSAUT", horizontal = TRUE) +  # See Figure XYZ
+## ----tic-ebm-term-PPERSAUT, fig.cap="Term contribution for $\\mathtt{PPERSAUT}$ from the fitted EBM model. Left: Main effect with standard error bars. Right: Distribution of $\\mathtt{PPERSAUT}$ in the training data."----
+plot(tic_ebm, "PPERSAUT", horizontal = TRUE) +  # See Figure 3
   ggplot(tictrn, aes(PPERSAUT)) +  # add distribution plot
   geom_bar() + 
   scale_x_discrete(drop = FALSE) +  # don't drop zero counts 
@@ -120,17 +125,17 @@ plot(tic_ebm, "PPERSAUT", horizontal = TRUE) +  # See Figure XYZ
 
 
 ## ----tic-ebm-term-PPERSAUT-html, eval=FALSE-----------------------------------
-#> plot(tic_ebm, term = "PPERSAUT", interactive = TRUE)
+#> plot(tic_ebm, term = "PPERSAUT", interactive = TRUE)  # See Figure 4
 
 ## ----tic-ebm-term-PPERSAUT-html-hide, echo=FALSE, fig.cap="Screenshot of an interactive visualization for the main effect of $\\mathtt{PPERSAUT}$ displayed in a Google Chrome browser."----
 knitr::include_graphics("images/screenshot.png")
 
 
-## ----tic-ebm-term-APERSAUT, fig.cap="Main effect for $\\mathtt{APERSAUT}$ Left: Original (i.e., unconstrained) effect. Right: Decreasing monotonic effect through post-pocessing the left figure using isotonic regression."----
+## ----tic-ebm-term-APERSAUT, fig.cap="Term contribution for $\\mathtt{APERSAUT}$ from the fitted EBM model. Left: Main effect with piecewise standard error band from the original unconstrained model. Right: Main effect with forced decreasing monotonicity through post-pocessing the left graph using isotonic regression."----
 tic_ebm_mono <- as.ebm(tic_ebm$copy())  # make a deep copy to leave original intact
 tic_ebm_mono$monotonize("APERSAUT", increasing = FALSE)
 
-# Display results side by side (see Figure XYZ)
+# Display results side by side (see Figure 5)
 plot(tic_ebm, term = "APERSAUT") + ggtitle("Original") +
   plot(tic_ebm_mono, term = "APERSAUT") + ggtitle("Monotonized")
 
@@ -138,21 +143,22 @@ plot(tic_ebm, term = "APERSAUT") + ggtitle("Original") +
 ## ----tic-ebm-term-APERSAUT-monotonize-html-noeval, eval=FALSE-----------------
 #> idx <- as.integer(which(tic_ebm$term_names_ == "APERSAUT") - 1L)
 #> plt <- tic_ebm$explain_global()$visualize(idx)
-#> plt$show()  # should open in a browser; can also call `plt$write_html("<path/to/file.html>")`
+#> plt$show()  # should open in a browser
+#> # Can also use `plt$write_html("<path/to/file.html>")` to write to HTML file
 
 
 ## ----tic-ebm-term-APERSAUT-monotonize-html, echo=FALSE------------------------
-idx <- as.integer(which(tic_ebm$term_names_ == "APERSAUT") - 1L) 
+idx <- as.integer(which(tic_ebm$term_names_ == "APERSAUT") - 1L)
 plt <- tic_ebm$explain_global()$visualize(idx)
 
 ## ----ebm-term-APERSAUT-monotonize-list----------------------------------------
-plt$to_ordered_dict()$data[[1L]]
+plt$to_ordered_dict()$data[[2L]]  # main effect only (i.e., no error bounds)
 
 
-## ----tic-ebm-local, fig.cap="ABC."--------------------------------------------
+## ----tic-ebm-local, fig.cap="Local contributions from the fitted EBM model to the predicted outcome for the first customer in the test set."----
 newx <- subset(tictst[1L, ], select = -CARAVAN)
 newy <- tictst$CARAVAN[1L]  # not useful unless `interactive = TRUE`
-plot(tic_ebm, local = TRUE, X = newx, y = newy)  # See Figure XYZ
+plot(tic_ebm, local = TRUE, X = newx, y = newy)  # See Figure 6
 
 
 ## ----als----------------------------------------------------------------------
@@ -170,12 +176,14 @@ pred <- predict(als_ebm, newdata = alstst)
 (mse_tst <- mean((alstst$dFRS - pred)^2))
 
 
-## ----als-ebm-importance, fig.cap="ABC."---------------------------------------
-plot(als_ebm, n_terms = 10)  # See Figure XYZ
+## ----als-ebm-importance, fig.cap="Term importance scores from the fitted EBM model computed as the mean absolute contribution from each term in the model. Only the top 10 terms are displayed."----
+plot(als_ebm, n_terms = 10)  # See Figure 7
 
 
-## ----als-ebm-pairwise-interaction, fig.cap="ABC."-----------------------------
-plot(als_ebm, term = c("Onset.Delta", "last.slope.weight"))  # See Figure XYZ
+## ----als-ebm-pairwise-interaction, fig.cap="Term contributions from the fitted EBM model to the ALS data. Left: Main effect of $\\mathtt{Onset.Delta}$. Right: Pairwise interaction effect of $\\mathtt{Onset.Delta}$ \\& $\\mathtt{last.slope.weight}$."----
+p1 <- plot(als_ebm, term = "Onset.Delta")  # main effect
+p2 <- plot(als_ebm, term = c("Onset.Delta", "last.slope.weight"))  # interaction
+gridExtra::grid.arrange(grobs = list(p1, p2), nrow = 1)  # See Figure 8
 
 
 ## ----als-ebm-term-matrices----------------------------------------------------
@@ -194,10 +202,10 @@ head(cbind(
 ## ----als-ebm-lasso------------------------------------------------------------
 library(glmnet)
 
-# Fit the LASSO regularization path using the term contributions as inputs
+# Fit the entire LASSO path using the term contributions, f(x), as inputs
 lasso <- glmnet(X_trn, y = alstrn$dFRS, lower.limits = 0, standardize = FALSE)
 
-# Assess performance of fit using an independent test set
+# Assess performance of the LASSO fit using the independent test set
 perf <- assess.glmnet(lasso, newx = X_tst, newy = alstst$dFRS)
 perf <- do.call(cbind, args = perf)  # bind results into matrix
 
@@ -211,8 +219,8 @@ lambda <- res[which.min(res$mse), "lambda"]
 res[which.min(res$mse), ]
 
 
-## ----als-ebm-lassso-plot, fig.cap="ABC."--------------------------------------
-# Plot results (see Figure 7)
+## ----als-ebm-lassso-plot, fig.cap="Results from post-processing the fitted EBM model using the LASSO. Left: LASSO coefficient path (one coefficient for each term in the EBM model). Right: Number of non-zero coefficients/EBM terms vs. the corresponding test MSE."----
+# Plot results (see Figure 9)
 par(mfrow = c(1, 2), mar = c(4, 4, 0.1, 0.1), cex.lab = 0.95, 
     cex.axis = 0.8, mgp = c(2, 0.7, 0), tcl = -0.3, las = 1)
 plot(lasso, xvar = "lambda", col = adjustcolor("darkred", alpha.f = 0.3),
@@ -223,12 +231,12 @@ plot(res[, c("n_terms", "mse")], type = "l", las = 1,
 abline(h = mse_tst, lty = 2, col = "darkred")
 
 
-## ----als-ebm-lasso-scale, fig.cap="ABC."--------------------------------------
+## ----als-ebm-lasso-scale, fig.cap="Term importance scores from the compressed EBM model computed as the mean absolute contribution from each term in the model."----
 als_ebm_lasso <- as.ebm(als_ebm$copy())
 weights <- coef(lasso, s = lambda)  # LASSO coefficients (most are zero!)
 weights <- setNames(as.numeric(weights), nm = rownames(weights))
 for (i in seq_along(weights[-1L])) {
-  idx <- as.integer(i - 1L)  # Sigh, Python indexing starts at 0
+  idx <- as.integer(i - 1L)  # Sigh, don't forget Python indexing starts at 0!
   als_ebm_lasso$scale(idx, factor = weights[i + 1])
 }
 als_ebm_lasso$intercept_ <- weights[1L]
@@ -236,28 +244,28 @@ als_ebm_lasso$intercept_ <- weights[1L]
 # Remove unused terms!
 als_ebm_lasso$sweep(terms = TRUE, bins = TRUE, features = FALSE)
 length(als_ebm_lasso$term_names_)
-plot(als_ebm_lasso)  # show new term importance scores (see Figure 8)
+plot(als_ebm_lasso)  # show new term importance scores (see Figure 10)
 
 
 ## ----als-ebm-lasso-sanity-----------------------------------------------------
 # Compare predictions between LASSO and compressed EBM (should be the same!)
 head(cbind(
   "EBM (Compressed)" = predict(als_ebm_lasso, newdata = alstst),
-  "LASSO" = unname(predict(lasso, newx = X_tst, s = lambda, type = "response")))
-)
+  "LASSO" = predict(lasso, newx = X_tst, s = lambda, type = "response")[, 1L]
+))
 
 
-## ----ebm-parallelism, fig.cap="ABC. Left: ABC. Right: ABC."-------------------
+## ----ebm-parallelism, fig.cap="Main effect of temperature in Celsius. Left: Outer and inner bagging. Right: No bagging."----
 keep <- c("workingday", "temp", "weathersit", "mnth", "hr", "bikers") 
 bikeshare <- ISLR2::Bikeshare[, keep]
 
-# Use all CPUs (this is the default, which sets n_jobs = -1)
+# Use all CPUs (n_jobs = -1; this is the default
 system.time({
   ebm1 <- ebm(bikers ~ ., data = bikeshare, objective = "poisson_deviance",
               inner_bags = 20, outer_bags = 16, n_jobs = -1)
 })
 
-# Use one CPU
+# Use one CPU (n_jobs = 1)
 system.time({
   ebm2 <- ebm(bikers ~ ., data = bikeshare, objective = "poisson_deviance",
               inner_bags = 20, outer_bags = 16, n_jobs = 1)
@@ -269,11 +277,11 @@ system.time({
               inner_bags = 0, outer_bags = 1, n_jobs = -1)
 })
 
-# Plot results (see Figure 9)
+# Plot results (see Figure 11)
 plot(ebm2, term = "temp") + plot(ebm3, term = "temp") 
 
 
-## ----ebm-merging, fig.cap="ABC."----------------------------------------------
+## ----ebm-merging, fig.cap="Main effect of the number of cylinders. Top left, top right, and bottom left correspond to the main effect from EBMs with different random seeds and no bagging. Bottom right corresponds to the main effect from the merged EBM."----
 # Generate list of EBMs with different random seeds
 ebms <- lapply(1:3, FUN = function(i) {
   ebm(mpg ~ ., data = mtcars, outer_bags = 1, random_state = i, obj = "rmse")
@@ -284,5 +292,5 @@ merged <- do.call(merge, args = ebms)
 
 # Display plots for "cyl" term in 2x2 grid (see Figure 10)
 cyl_plots <- lapply(c(ebms, merged), FUN = plot, term = "cyl")
-gridExtra::grid.arrange(grobs = cyl_plots, nrow = 2)
+gridExtra::grid.arrange(grobs = cyl_plots, nrow = 2)  # See Figure 12
 

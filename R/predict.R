@@ -25,7 +25,8 @@
 #' contributions are on the link scale, where they are additive.
 #'
 #' @param se_fit Logical indicating whether or not standard errors are required.
-#' Ignored for multiclass outcomes.
+#' Ignored for multiclass outcomes. Note that standard errors are only available
+#' on the link scale.
 #'
 #' @param init_score  Optional. Either a model that can generate scores or
 #' per-sample initialization score. If samples scores it should be the same

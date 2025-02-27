@@ -1,0 +1,10 @@
+\documentclass{article}
+\usepackage{pdfpages}
+%\VignetteIndexEntry{ebm-introduction}
+%\VignetteKeywords{R, explainable boosting machine, EBM, generalized additive model, GAM, machine learning, glassbox, interpretability, explainability}
+%\VignettePackage{ebm}
+%\VignetteEncoding{UTF-8}
+
+\begin{document}
+\includepdf[pages=-, fitpaper=true]{pdf/RJwrapper.pdf}
+\end{document}
