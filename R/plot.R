@@ -188,7 +188,7 @@ plot_global <- function(
     term = NULL,
     interactive = FALSE,
     n_terms = NULL,
-    geom = c("point", "col"),
+    geom = c("point", "col", "bar"),
     mapping = NULL,
     aesthetics = list(),
     horizontal = FALSE,
@@ -219,7 +219,7 @@ plot_global <- function(
       # ord <- order(imp, decreasing = FALSE)
       # dotchart(imp[ord], labels = tna[ord],
       #          xlab = "Mean absolute score (weighted)", ...)
-      gg_plot_importance(object, n_terms = n_terms, geom = geom,
+      gg_plot_importance(object, n_terms = n_terms, geom = match.arg(geom),
                          mapping = mapping, aesthetics = aesthetics,
                          horizontal = horizontal, ...)
     } else {
@@ -234,7 +234,7 @@ plot_global <- function(
         ggplot_scatter(ordered_dict, mapping = mapping, aesthetics = aesthetics,
                        uncertainty = uncertainty, alpha = alpha, fill = fill, ...)
       } else if (plot_type == "bar") {
-        ggplot_bar(ordered_dict, geom = geom, mapping = mapping,
+        ggplot_bar(ordered_dict, geom = match.arg(geom), mapping = mapping,
                    aesthetics = aesthetics, horizontal = horizontal,
                    uncertainty = uncertainty, width = width, ...)
       } else {
@@ -310,7 +310,7 @@ plot_local <- function(
     y = NULL,
     init_score = NULL,
     interactive = FALSE,
-    geom = c("point", "col"),
+    geom = c("point", "col", "bar"),
     mapping = NULL,
     aesthetics = list(),
     horizontal = FALSE,
@@ -320,7 +320,7 @@ plot_local <- function(
     ...
 ) {
 
-  if (nrow(X) != 1 || length(y) != 1L) {
+  if (nrow(X) != 1 || length(y) > 1L) {  # NULL has length 0
     warning("Plotting local explanations currently only works for a single ",
             "observation. Plotting explanations only for the first row of `X`.",
             call. = FALSE)
@@ -337,7 +337,7 @@ plot_local <- function(
     }
     plt <- object$explain_local(X, y = y, init_score = init_score)$visualize(0L)  # Python plotly object
     ordered_dict <- plt$to_ordered_dict()
-    gg_plot_explanation(ordered_dict, geom = geom, mapping = mapping,
+    gg_plot_explanation(ordered_dict, geom = match.arg(geom), mapping = mapping,
                         aesthetics = aesthetics, horizontal = horizontal, ...)
 
   ##############################################################################
@@ -407,13 +407,13 @@ plot_local <- function(
 gg_plot_importance <- function(
     object,
     n_terms = NULL,
-    geom = c("point", "col"),
+    geom = c("point", "col", "bar"),
     mapping = NULL,
     aesthetics = list(),
     horizontal = FALSE,
     ...
 ) {
-  geom <- match.arg(geom, several.ok = FALSE)
+  geom <- match.arg(geom, several.ok = TRUE)
   df <- data.frame(
     "x" = object$term_names_,
     "y" = as.numeric(object$term_importances())  # mean absolute score
@@ -465,7 +465,7 @@ ggplot_bar <- function(
     uncertainty = TRUE,
     width = 0.5
 ) {
-  geom <- match.arg(geom, several.ok = FALSE)
+  geom <- match.arg(geom, several.ok = TRUE)
   plotly_data <- ordered_dict$data[[1L]]  # second component is distribution
   df <- data.frame(
     "x" = plotly_data$x,
@@ -474,7 +474,7 @@ ggplot_bar <- function(
   )
   df$x <- factor(df$x, levels = df$x)  # maintain factor level ordering
   p <- ggplot2::ggplot(df, ggplot2::aes(x = x, y = y))
-  if (geom == "col") {
+  if (geom == "col" || geom == "bar") {
     p <- p + do.call(
       what = ggplot2::geom_col,
       args = c(list(mapping = mapping), aesthetics)
@@ -515,7 +515,7 @@ ggplot_scatter <- function(
     alpha = 0.5,
     fill = "grey"
 ) {
-  # geom <- match.arg(geom, several.ok = FALSE)
+  # geom <- match.arg(geom, several.ok = TRUE)
   # components <- sapply(ordered_dict$data, FUN = function(x) x$name)
   # main <- which(components == "Main")
   odd <- ordered_dict$data
@@ -600,7 +600,7 @@ gg_plot_explanation <- function(
     horizontal = FALSE,
     ...
 ) {
-  geom <- match.arg(geom, several.ok = FALSE)
+  geom <- match.arg(geom, several.ok = TRUE)
   df <- data.frame(
     "y" = ordered_dict$data[[1L]]$x,  # contribution to prediction
     "x" = ordered_dict$data[[1L]]$y,
@@ -610,7 +610,7 @@ gg_plot_explanation <- function(
   df[["z"]][df[["y"]] <= 0] <- "Negative"
   df[["z"]][df[["x"]] == "Intercept"] <- "Intercept"
   p <- ggplot2::ggplot(df, ggplot2::aes(x = reorder(x, y), y = y, color = z, fill = z))
-  if (geom == "col") {
+  if (geom == "col" || geom == "bar") {
     p <- p + do.call(
       what = ggplot2::geom_col,
       args = c(list(mapping = mapping), aesthetics)

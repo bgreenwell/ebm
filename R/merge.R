@@ -21,6 +21,19 @@
 #' library and does not prevent this function from working. The error message is
 #' seemingly just a side effect.
 #'
+#' @examples
+#' \dontrun{
+#' # Generate list of EBMs with different random seeds
+#' ebms <- lapply(1:3, FUN = function(i) {
+#'   ebm(mpg ~ ., data = mtcars, outer_bags = 1, random_state = i, obj = "rmse")
+#' })
+#'
+#' # Merge EBMs into one and plot term contribution for `cyl`
+#' merged <- do.call(merge, args = ebms)
+#' plot(merged, term = "cyl")
+#' }
+#'
+#'
 #' @export
 merge.EBM <- function(x, y, ...) {
   stopifnot(inherits(x, what = "EBM"), inherits(y, what = "EBM"))

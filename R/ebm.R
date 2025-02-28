@@ -205,26 +205,24 @@
 #'
 #' @examples
 #' \dontrun{
-#'   data("Hitters", package = "ISLR2")
-#'
-#'   # Remove rows with missing response values
-#'   hitters <- Hitters[!is.na(Hitters$Salary), ]
+#'   #
+#'   # Regression example
+#'   #
 #'
 #'   # Fit a default EBM regressor
-#'   fit <- ebm(Salary ~ ., data = hitters, objective = "rmse")
+#'   fit <- ebm(mpg ~ ., data = mtcars, objective = "rmse")
 #'
 #'   # Generate some predictions
-#'   head(predict(fit, newdata = hitters))
-#'   head(predict(fit, newdata = hitters, se.fit = TRUE))
+#'   head(predict(fit, newdata = mtcars))
+#'   head(predict(fit, newdata = mtcars, se_fit = TRUE))
 #'
 #'   # Show global summary and GAM shape functions
 #'   plot(fit)
-#'   plot(fit, term = "Years")
-#'   plot(fit, display = "url")  # can paste the resulting URL in the browser
+#'   plot(fit, term = "cyl")
+#'   plot(fit, term = "cyl", interactive = TRUE)
 #'
-#'   # Understand an individual prediction
-#'   x <- subset(hitters, select = -Salary)[1L, ]  # use first observation
-#'   ebm_show(fit, local = TRUE, X = x, y = hitters$Salary[1L])
+#'   # Explain prediction for first observation
+#'   plot(fit, local = TRUE, X = subset(mtcars, select = -mpg)[1L, ])
 #' }
 #'
 #' @export

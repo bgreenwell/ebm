@@ -3,9 +3,9 @@
 \docType{package}
 \name{ebm-package}
 \alias{ebm-package}
-\title{ebm: What the Package Does (Title Case)}
+\title{ebm: Explainable Boosting Machines}
 \description{
-More about what it does (maybe more than one line). Continuation lines should be indented.
+An interface to the Python InterpretML framework for fitting explainable boosting machines (EBMs) \doi{10.48550/arXiv.1909.09223}. EBMs are a modern type of generalized additive model that use tree-based, cyclic gradient boosting with automatic interaction detection. They are often as accurate as state-of-the-art blackbox models while remaining completely interpretable.
 }
 \seealso{
 Useful links:
@@ -16,7 +16,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Brandon Greenwell \email{greenwell.brandon@gmail.com} (\href{https://orcid.org/0000-0002-8120-0084}{ORCID})
+\strong{Maintainer}: Brandon M. Greenwell \email{greenwell.brandon@gmail.com} (\href{https://orcid.org/0000-0002-8120-0084}{ORCID})
 
 }
 \keyword{internal}
