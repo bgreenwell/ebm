@@ -1,0 +1,25 @@
+---
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Dear Rob Hyndman,
+
+Please consider the manuscript entitled "XYZ" for submission to The R Journal. As a past author and reviewer for The R Journal, I believe it's the perfect outlet for this manuscript. This manuscript introduces the **ebm** package to the readers. In short, **ebm** is an R interface to the Python InterpretML framework for fitting explainable boosting machines (EBMs). The manuscript itself is a mixture of article types, including "Packages", "Comparisons and benchmarking", and "Applications." 
+
+For the most part, I describe the **ebm** package, which provides a full-functioning interface to the InterpretML framework in Python for fitting EBMs. I also discuss how it compares to the official **interpret** package by Microsoft Research, which quite severely lags behind its Python counterpart. I also show a new and interesting application of post-processing complex EBM models using the well-known **glmnet** package.
+
+Publishing this manuscript in The R Journal will be beneficial to the readers for at least two reasons:
+
+1. It provides a thorough overview of an important (and popular) methodology and its usage via the **ebm** package, which provides all the functionality of the underlying Python library (including interactive explanations). The manuscripts contains numerous examples using a package written for R users (e.g., formula interface, extending useful generics, like `plot()`, `print()`, and `predict()`).
+
+2. For data scientists and R developers, it showcases the true flexibility of R by describing how to use **reticulate** to interface directly with other popular software and avoiding reinventing the wheel. I also show how to further with the **ebm** package by interacting direclty with the underlying Python objects.
+
+Thank you Rob for taking the time to read this letter and manuscript, and I hope that you find it to be suitable for submission to The R Journal.
+
+Sincerely,
+
+Brandon Greenwell
