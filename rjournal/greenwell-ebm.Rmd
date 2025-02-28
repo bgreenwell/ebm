@@ -159,11 +159,6 @@ names(interpret$glassbox)
 Note that `"ExplainableBoostingClassifier"` and `"ExplainableBoostingRegressor"` are the core modules from \pkg{interpret.glassbox} that power the \pkg{ebm} package. In this article, I used Python version `r reticulate::py_version()`.
 
 
-## A quick comparison of GAMs, GBMs, and EBMs
-
-TBD.
-
-
 ## Predicting and explaining policy ownership (the CoIL 2000 challenge)
 
 In this section, we briefly describe a binary classification example using data from the CoIL 2000 Challenge [@putten-2004-coil]. The data set, which we'll obtain from the R package \CRANpkg{kernlab} [@R-kernlab], consists of 9822 customer records containing 86 variables, including product usage data and socio-demographic data derived from zip area codes. The goal of the challenge was to be able to answer the following question: "Can you predict who would be interested in buying a caravan insurance policy and give an explanation of why?" Hence, being able to explain your model's predictions was key to being successful in this challenge.
@@ -376,7 +371,14 @@ From Figure \ref{fig:als-ebm-pairwise-interaction}, we can see that increasing `
 
 Compared to "black-box" models, like random forests and deep neural networks, EBMs are considered "glass-box" models that can be competitively accurate while also maintaining a higher degree of transparency and explainability. However, as discussed earlier, EBMs become readily less transparent and harder to interpret in high-dimensional settings with many predictor variables; they also become more difficult to use in production due to increases in scoring time. To that end, @greenwell-2023-explainable proposed a simple solution based on the least absolute shrinkage and selection operator (LASSO) [@tibshirani-1996-lasso]. Their approach can help introduce sparsity by reweighting the individual model terms and removing the less relevant ones, thereby allowing these models to maintain their transparency and relatively fast scoring times in higher-dimensional settings. The idea is similar in spirit to the importance sampled learning ensemble strategy proposed in @friedman-2003-importance. In short, post-processing a fitted EBM with many (i.e., possibly hundreds or thousands) of terms using the LASSO can help reduce the model's complexity and drastically improve scoring time. 
 
-We'll illustrate the basic idea using the previous model, which contains a total of 703 terms comprised of the main effects, pairwise interactions, and an intercept. In the next chunk, we'll construct data matrices consisting of the individual term contributions for both the train and test sets. For example, the $j$-th column of `X_trn` is given by the contribution of the $j$-th term of the model $\left\{f_j\left(x_{ij}\right)\right\}_{i=1}^n$ over the training set. These data matrices will be used as input to the LASSO in the next step.
+In short, a LASSO-compressed EBM will have the following form (ignoring pairwise interactions for brevity):
+\begin{equation}
+g\left(E\left[Y|\boldsymbol{x}\right]\right) = \beta_0 + \sum_{i=1}^p \beta_if_i\left(x_i\right),
+  \label{eqn:ebm}
+\end{equation}
+where the coefficients $\left\{\beta_i\right\}_{i=0}^p$ are estimated from the LASSO. Ideally, many of the term weights will be zero, meaning those terms can be dropped from the model. Oftentimes, as will be shown here for the ALS example, this can result in a substantial reduction of the number of terms in the final EBM model.
+
+We'll illustrate the basic idea using the previously fit EBM model, which contains a total of 703 terms comprised of the main effects, pairwise interactions, and an intercept. In the next chunk, we'll construct data matrices consisting of the individual term contributions for both the train and test sets. For example, the $j$-th column of `X_trn` is given by the contribution of the $j$-th term of the model $\left\{f_j\left(x_{ij}\right)\right\}_{i=1}^n$ over the training set. These data matrices will be used as input to the LASSO in the next step.
 
 ```{r als-ebm-term-matrices}
 X_trn <- predict(als_ebm, newdata = alstrn, type = "terms")
