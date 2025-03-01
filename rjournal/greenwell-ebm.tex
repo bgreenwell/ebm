@@ -1,5 +1,5 @@
 % !TeX root = RJwrapper.tex
-\title{Fitting Explainable Boosting Machines in R with the ebm Package}
+\title{Explainable Boosting Machines in R with the ebm Package}
 \author{by Brandon M. Greenwell}
 
 \maketitle
@@ -1080,11 +1080,11 @@ gridExtra::grid.arrange(grobs = list(p1, p2), nrow = 1)  # See Figure 8
 
 From Figure \ref{fig:als-ebm-pairwise-interaction}, we can see that
 increasing \texttt{Onset.Delta} is associated with a decrease in the
-predicted outcome (a lterger outcome is better here). This confirms that
+predicted outcome (a larger outcome is better here). This confirms that
 a longer time since diagnosis predicts a lower decline. The pairwise
 interaction plot suggests that the relationship between
 \texttt{Onset.Delta} and predicted \texttt{dFRS} is reversed between
-negative and nonnegative values of \texttt{last.slope.weight} (the
+negative and non-negative values of \texttt{last.slope.weight} (the
 difference in weight between the last two visits).
 
 Compared to ``black-box'' models, like random forests and deep neural
@@ -1110,20 +1110,23 @@ In short, a LASSO-compressed EBM will have the following form (ignoring
 pairwise interactions for brevity): \begin{equation}
 g\left(E\left[Y|\boldsymbol{x}\right]\right) = \beta_0 + \sum_{i=1}^p \beta_if_i\left(x_i\right),
   \label{eqn:ebm}
-\end{equation} where the coefficients \(\left\{\beta_i\right\}_{i=0}^p\)
-are estimated from the LASSO. Ideally, many of the term weights will be
-zero, meaning those terms can be dropped from the model. Oftentimes, as
-will be shown here for the ALS example, this can result in a substantial
-reduction of the number of terms in the final EBM model.
+\end{equation} where the term weights/coefficients,
+\(\left\{\beta_i\right\}_{i=0}^p\), are estimated from the LASSO.
+Ideally, many of the term weights will be zero, meaning those terms can
+be dropped from the model. Oftentimes, as will be shown here for the ALS
+example, this can result in a substantial reduction of the number of
+terms in the final EBM model.
 
 We'll illustrate the basic idea using the previously fit EBM model,
 which contains a total of 703 terms comprised of the main effects,
-pairwise interactions, and an intercept. In the next chunk, we'll
-construct data matrices consisting of the individual term contributions
-for both the train and test sets. For example, the \(j\)-th column of
-\texttt{X\_trn} is given by the contribution of the \(j\)-th term of the
-model \(\left\{f_j\left(x_{ij}\right)\right\}_{i=1}^n\) over the
-training set. These data matrices will be used as input to the LASSO in
+pairwise interactions, and an intercept. The LASSO model will
+essentially treat each individual term as a feature in the regression
+model. To that end, we'll next construct data matrices consisting of the
+individual term contributions for both the train and test sets. For
+example, the \(j\)-th column of \texttt{X\_trn} is given by the
+contribution of the \(j\)-th term of the model,
+\(f_j\left(x_{ij}\right)\), over the training set (not counting the
+intercept). These data matrices will be used as input to the LASSO in
 the next step.
 
 \begin{Schunk}
