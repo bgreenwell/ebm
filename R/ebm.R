@@ -239,7 +239,7 @@
 #'   head(predict(fit, newdata = mtcars, se_fit = TRUE))
 #'
 #'   # Show global summary and GAM shape functions
-#'   plot(fit)
+#'   plot(fit)  # term importance scores
 #'   plot(fit, term = "cyl")
 #'   plot(fit, term = "cyl", interactive = TRUE)
 #'
