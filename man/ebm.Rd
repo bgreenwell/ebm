@@ -225,7 +225,8 @@ module.}
 \item{...}{Additional optional argument. (Currently ignored.)}
 }
 \value{
-A trained EBM model.
+An object of class \code{"EBM"} for which there are \link[=print.EBM]{print},
+\link[=predict.EBM]{predict}, \link[=plot.EBM]{plot}, and \link[=merge.EBM]{merge} methods.
 }
 \description{
 This function is an R wrapper for the explainable boosting functions in the
@@ -234,6 +235,25 @@ trains an Explainable Boosting Machine (EBM) model, which is a tree-based,
 cyclic gradient boosting generalized additive model with automatic
 interaction detection. EBMs are often as accurate as state-of-the-art
 blackbox models while remaining completely interpretable.
+}
+\details{
+In short, EBMs have the general form
+
+\deqn{E\left[g\left(Y|\boldsymbol{x}\right)\right] = \theta_0 + \sum_if_i\left(x_i\right) + \sum_{ij}f_{ij}\left(x_i, x_j\right) \quad \left(i \ne j\right),}
+
+where,
+\itemize{
+\item \eqn{g} is a link function that allows the model to handle various response
+types (e.g., the logit link for logistic regression or Poisson deviance for
+modeling counts and rates);
+\item \eqn{\theta_0} is a constant intercept (or bias term);
+\item \eqn{f_i} is the term contribution (or shape function) for predictor
+\eqn{x_i} (i.e., it captures the main effect of \eqn{x_i} on
+\eqn{E\left[Y|\boldsymbol{x}\right]});
+\item \eqn{f_{ij}} is the term contribution for the pair of predictors \eqn{x_i}
+and \eqn{x_j} (i.e., it captures the joint effect, or pairwise interaction
+effect of \eqn{x_i} and \eqn{x_j} on \eqn{E\left[Y|\boldsymbol{x}\right]}).
+}
 }
 \examples{
 \dontrun{
