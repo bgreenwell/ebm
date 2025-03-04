@@ -5,7 +5,7 @@
 \alias{ebm-package}
 \title{ebm: Explainable Boosting Machines}
 \description{
-An interface to the 'Python' 'InterpretML' framework for fitting the explainable boosting machines (EBMs) discussed in Nori et al. (2019) \doi{10.48550/arXiv.1909.09223}. EBMs are a modern type of generalized additive model that use tree-based, cyclic gradient boosting with automatic interaction detection. They are often as accurate as state-of-the-art blackbox models while remaining completely interpretable.
+An interface to the 'Python' 'InterpretML' framework for fitting explainable boosting machines (EBMs); see Nori et al. (2019) \doi{10.48550/arXiv.1909.09223} for details. EBMs are a modern type of generalized additive model that use tree-based, cyclic gradient boosting with automatic interaction detection. They are often as accurate as state-of-the-art blackbox models while remaining completely interpretable.
 }
 \seealso{
 Useful links:
