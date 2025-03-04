@@ -12,7 +12,10 @@
 \item{digits}{The number of significant digits to be passed to \code{\link[=format]{format()}}
 when \link{print}ing.}
 
-\item{...}{Additional optional arguments passed \code{\link[=print.default]{print.default()}}.}
+\item{...}{Additional optional arguments to be passed to \code{\link[=print.default]{print.default()}}.}
+}
+\value{
+Invisibly returns the printed \link{ebm} object.
 }
 \description{
 Display basic information about a fitted \link{ebm} object.

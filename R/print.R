@@ -7,7 +7,9 @@
 #' @param digits The number of significant digits to be passed to [format()]
 #' when [print]ing.
 #'
-#' @param ... Additional optional arguments passed [print.default()].
+#' @param ... Additional optional arguments to be passed to [print.default()].
+#'
+#' @returns Invisibly returns the printed [ebm] object.
 #'
 #' @export
 print.EBM <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {

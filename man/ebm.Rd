@@ -247,6 +247,7 @@ where,
 types (e.g., the logit link for logistic regression or Poisson deviance for
 modeling counts and rates);
 \item \eqn{\theta_0} is a constant intercept (or bias term);
+?
 \item \eqn{f_i} is the term contribution (or shape function) for predictor
 \eqn{x_i} (i.e., it captures the main effect of \eqn{x_i} on
 \eqn{E\left[Y|\boldsymbol{x}\right]});

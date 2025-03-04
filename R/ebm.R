@@ -214,7 +214,7 @@
 #' modeling counts and rates);
 #'
 #' * \eqn{\theta_0} is a constant intercept (or bias term);
-#'
+#'?
 #' * \eqn{f_i} is the term contribution (or shape function) for predictor
 #' \eqn{x_i} (i.e., it captures the main effect of \eqn{x_i} on
 #' \eqn{E\left[Y|\boldsymbol{x}\right]});

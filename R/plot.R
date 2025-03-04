@@ -88,6 +88,15 @@ x <- y <- z <- y_error <- y_lwr <- y_upr <- NULL
 #' @param ... Additional optional arguments. Currently only passed onto
 #' [levelplot()][lattice::levelplot()] for heatmaps of interaction effects.
 #'
+#' @returns When `interactive = FALSE` (the default), the output is either a
+#' [ggplot][ggplot2::ggplot()] object when visualizing term importance scores or
+#' main effects, or a [trellis][lattice::levelplot()] object when visualizing
+#' pairwise interaction effects. When `interactive = TRUE`, the return value
+#' depends on `display` argument. When `display = "url"`, a character string
+#' is returned giving the URL for displaying the HTML-based visualization.
+#' Otherwise, the results are viewed as requested (i.e., in a browser, built-in
+#' viewer, or displayed in rendered HTML output).
+#'
 #' @importFrom graphics dotchart
 #' @importFrom lattice levelplot
 #' @importFrom stats reorder

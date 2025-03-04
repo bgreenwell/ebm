@@ -112,6 +112,16 @@ or \code{display = "url"} (e.g., paste the resulting URL in your browser).}
 \item{...}{Additional optional arguments. Currently only passed onto
 \link[lattice:levelplot]{levelplot()} for heatmaps of interaction effects.}
 }
+\value{
+When \code{interactive = FALSE} (the default), the output is either a
+\link[ggplot2:ggplot]{ggplot} object when visualizing term importance scores or
+main effects, or a \link[lattice:levelplot]{trellis} object when visualizing
+pairwise interaction effects. When \code{interactive = TRUE}, the return value
+depends on \code{display} argument. When \code{display = "url"}, a character string
+is returned giving the URL for displaying the HTML-based visualization.
+Otherwise, the results are viewed as requested (i.e., in a browser, built-in
+viewer, or displayed in rendered HTML output).
+}
 \description{
 Provides an interactive visualization for a given explanation(s).
 }
