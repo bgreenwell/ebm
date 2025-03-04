@@ -45,7 +45,7 @@ length as \code{newdata}.}
 \item{...}{Additional optional arguments. (Currently ignored.)}
 }
 \value{
-Either a vector, matrix, or list of result. See the \code{type} argument
+Either a vector, matrix, or list of results. See the \code{type} argument
 for details.
 }
 \description{

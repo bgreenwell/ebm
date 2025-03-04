@@ -34,7 +34,7 @@
 #'
 #' @param ... Additional optional arguments. (Currently ignored.)
 #'
-#' @returns Either a vector, matrix, or list of result. See the `type` argument
+#' @returns Either a vector, matrix, or list of results. See the `type` argument
 #' for details.
 #'
 #' @importFrom stats predict
