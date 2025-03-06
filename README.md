@@ -1,9 +1,9 @@
 # ebm
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/ebm)](https://CRAN.R-project.org/package=ebm)
 [![R-CMD-check](https://github.com/bgreenwell/ebm/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bgreenwell/ebm/actions/workflows/R-CMD-check.yaml)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![CRAN status](https://www.r-pkg.org/badges/version/ebm)](https://CRAN.R-project.org/package=ebm)
 <!-- badges: end -->
 
 A [reticulate](https://rstudio.github.io/reticulate/)-powered interface to the Python [InterpretML](https://interpret.ml/) framework for fitting [explainable boosting machines](https://doi.org/10.48550/arXiv.1909.09223) (EBMs). EBMs are a modern type of generalized additive model that use tree-based, cyclic gradient boosting with automatic interaction detection. They are often as accurate as state-of-the-art blackbox models while remaining completely interpretable.
