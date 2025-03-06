@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2025.2.28)  1 MAR 2025 08:27
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2025.2.28)  5 MAR 2025 20:25
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -929,7 +929,7 @@ LaTeX Warning: There were undefined references.
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `RJwrapper.out' has not changed.
-(rerunfilecheck)             Checksum: 71B322D553A40B4D49C4B0DBC7C9E3A0;2698.
+(rerunfilecheck)             Checksum: 69A55F33F6C7624E09EA1DFB6DF531B2;2741.
 Package rerunfilecheck Info: File `RJwrapper.brf' has not changed.
 (rerunfilecheck)             Checksum: B085F769EBDB6381D70E2A4129FD915A;2842.
  ) 
@@ -951,7 +951,7 @@ pdfTeX warning (dest): name{Hfootnote.2} has been referenced but does not exist,
 pdfTeX warning (dest): name{Hfootnote.1} has been referenced but does not exist, replaced by a fixed one
 
  </Users/bgreenwell/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/tctt0900.600pk></Users/bgreenwell/Library/TinyTeX/texmf-dist/fonts/type1/public/inconsolata/Inconsolata-zi4r.pfb></Users/bgreenwell/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></Users/bgreenwell/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></Users/bgreenwell/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></Users/bgreenwell/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></Users/bgreenwell/Library/TinyTeX/texmf-dist/fonts/type1/public/mathpazo/fplmbi.pfb></Users/bgreenwell/Library/TinyTeX/texmf-dist/fonts/type1/public/mathpazo/fplmr.pfb></Users/bgreenwell/Library/TinyTeX/texmf-dist/fonts/type1/public/mathpazo/fplmri.pfb></Users/bgreenwell/Library/TinyTeX/texmf-dist/fonts/type1/urw/palatino/uplb8a.pfb></Users/bgreenwell/Library/TinyTeX/texmf-dist/fonts/type1/urw/palatino/uplbi8a.pfb></Users/bgreenwell/Library/TinyTeX/texmf-dist/fonts/type1/urw/palatino/uplr8a.pfb></Users/bgreenwell/Library/TinyTeX/texmf-dist/fonts/type1/urw/palatino/uplri8a.pfb>
-Output written on RJwrapper.pdf (23 pages, 492053 bytes).
+Output written on RJwrapper.pdf (23 pages, 492011 bytes).
 PDF statistics:
  695 PDF objects out of 1000 (max. 8388607)
  602 compressed objects within 7 object streams

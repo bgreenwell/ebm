@@ -1,5 +1,5 @@
 ---
-title: Explainable Boosting Machines in R with the ebm Package
+title: Fitting Explainable Boosting Machines in R with the ebm Package
 author:
   - name: Brandon M. Greenwell
     affiliation: University of Cincinnati
